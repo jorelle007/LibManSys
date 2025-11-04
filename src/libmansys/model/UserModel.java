@@ -11,8 +11,8 @@ public class UserModel {
     private String password;
     private String full_name;
     private String role;
-    private String secret_question;
-    private String secret_answer;
+    private String security_question;
+    private String security_answer;
     
     public UserModel() {
 
@@ -35,9 +35,9 @@ public class UserModel {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     
-    public String getSecret_question() { return secret_question; }
-    public void setSecret_question(String secret_question) { this.secret_question = secret_question; }
+    public String getSecurity_question() { return security_question; }
+    public void setSecurity_question(String secret_question) { this.security_question = secret_question; }
     
-    public String getSecret_answer() { return secret_answer; }
-    public void setSecret_answer(String secret_answer) { this.secret_answer = secret_answer; }
+    public String getSecurity_answer() { return security_answer; }
+    public void setSecurity_answer(String secret_answer) { this.security_answer = secret_answer; }
 }

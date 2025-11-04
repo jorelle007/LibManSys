@@ -14,13 +14,14 @@ public class Login extends javax.swing.JFrame {
      * Creates new form Login
      */
     public Login() {
-        initComponents();        
+        initComponents();
         pack();            // adjust to preferred size
         setLocationRelativeTo(null); // center window
     }
+
     public Login(Connection conn) {
         this();
-        this.conn = conn;        
+        this.conn = conn;
     }
 
     /**
@@ -180,7 +181,7 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    
+
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
 
         String username = txtUsername.getText();
@@ -197,8 +198,9 @@ public class Login extends javax.swing.JFrame {
             UserModel user = dao.login(username, password);
             if (user != null) {
                 JOptionPane.showMessageDialog(this, "Welcome, " + user.getFull_name() + "!");
-                //new DashboardFrame().setVisible(true); // open Main program
-                dispose(); // close login form
+                dispose(); // close login form                
+                new Home().setVisible(true); // open Main program
+
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!");
             }
@@ -209,7 +211,7 @@ public class Login extends javax.swing.JFrame {
 
     private void btnForgotPwActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnForgotPwActionPerformed
         this.setVisible(false);
-        Forgot forgot = new Forgot();
+        Forgot forgot = new Forgot(conn);
         forgot.setLocationRelativeTo(null);
         forgot.setVisible(true);
     }//GEN-LAST:event_btnForgotPwActionPerformed

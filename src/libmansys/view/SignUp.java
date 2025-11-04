@@ -10,10 +10,6 @@ public class SignUp extends javax.swing.JFrame {
 
     private Connection conn;
 
-//    public SignUp() {
-//        initComponents();
-//    }
-
     public SignUp(Connection conn) {
         this.conn = conn;
         initComponents();
@@ -197,15 +193,15 @@ public class SignUp extends javax.swing.JFrame {
         newUser.setFull_name(full_name);
         newUser.setUsername(username);
         newUser.setPassword(password);
-        newUser.setSecret_question(security_question);
-        newUser.setSecret_answer(security_answer);
+        newUser.setSecurity_question(security_question);
+        newUser.setSecurity_answer(security_answer);
 
         if (Stream.of(
                 newUser.getFull_name(),
                 newUser.getUsername(),
                 newUser.getPassword(),
-                newUser.getSecret_question(),
-                newUser.getSecret_answer()
+                newUser.getSecurity_question(),
+                newUser.getSecurity_answer()
         ).anyMatch(String::isEmpty)) {
             JOptionPane.showMessageDialog(this, "Please fill in all fields.");
             return;
@@ -223,7 +219,7 @@ public class SignUp extends javax.swing.JFrame {
             } 
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }        
 
     }//GEN-LAST:event_btnCreateActionPerformed
