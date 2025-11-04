@@ -1,0 +1,28 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# NetBeans
+nbproject/private/
+build/
+dist/
+*.log
+
+# Maven / Gradle (if you use them)
+target/
+.gradle/
+build/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DB dump is fine but keep credentials out of repo
+.env
+config.properties
