@@ -90,6 +90,11 @@ private String full_name;
         jLabel4.setText("Manage Student");
 
         btnManageBook.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Book.png"))); // NOI18N
+        btnManageBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnManageBookActionPerformed(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel5.setText("Summary");
@@ -98,7 +103,11 @@ private String full_name;
         jLabel3.setText("Manage Book");
 
         btnSummary.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/summary.png"))); // NOI18N
-        btnSummary.setBorderPainted(false);
+        btnSummary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSummaryActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -143,6 +152,11 @@ private String full_name;
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 0, 204)));
 
         btnAboutUs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/group2.png"))); // NOI18N
+        btnAboutUs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAboutUsActionPerformed(evt);
+            }
+        });
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel6.setText("Issue Book");
@@ -151,8 +165,18 @@ private String full_name;
         jLabel8.setText("About Us");
 
         btnReturnBook.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Return.png"))); // NOI18N
+        btnReturnBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReturnBookActionPerformed(evt);
+            }
+        });
 
         btnIssueBook.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Issue.png"))); // NOI18N
+        btnIssueBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIssueBookActionPerformed(evt);
+            }
+        });
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel7.setText("Return Book");
@@ -205,6 +229,11 @@ private String full_name;
 
         jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Logout.png"))); // NOI18N
         jButton7.setText("Logout");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         jMenu1.setText("File");
 
@@ -282,12 +311,54 @@ private String full_name;
     }// </editor-fold>//GEN-END:initComponents
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void btnManageStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageStudentActionPerformed
-        // TODO add your handling code here:
+        new Student().setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnManageStudentActionPerformed
+
+    private void btnManageBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageBookActionPerformed
+        new NewBook().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnManageBookActionPerformed
+
+    private void btnSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSummaryActionPerformed
+        new Summary().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnSummaryActionPerformed
+
+    private void btnIssueBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIssueBookActionPerformed
+        new Issue().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnIssueBookActionPerformed
+
+    private void btnReturnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnBookActionPerformed
+        new Return().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnReturnBookActionPerformed
+
+    private void btnAboutUsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAboutUsActionPerformed
+        new AboutUs().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnAboutUsActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        Object[] options = {"Logout", "Cancel"};
+        int option = JOptionPane.showOptionDialog(this, "Are you sure you want to logout?",
+                "Logout Confirmation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]);
+        
+        if (option == 0) {
+            this.dispose();
+            new Login().setVisible(true);
+        }
+    }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
      * @param args the command line arguments

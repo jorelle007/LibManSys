@@ -1,10 +1,6 @@
 
 package libmansys.model;
 
-/**
- *
- * @author jorel
- */
 public class UserModel {
     private int user_id;    
     private String username;

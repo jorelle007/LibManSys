@@ -4,7 +4,7 @@ import java.sql.*;
 import libmansys.model.UserModel;
 
 /**
- * DAO for Book-related DB calls
+ * DAO for User-related DB calls
  *
  * @author jorel
  */
