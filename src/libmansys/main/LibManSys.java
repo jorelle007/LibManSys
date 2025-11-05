@@ -1,12 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
+
 package libmansys.main;
 
 import libmansys.dao.*;
 import libmansys.view.Login;
 import java.sql.*;
+import libmansys.view.Home;
 
 //import libmansys.view.LoginFrame;
 /**
@@ -27,9 +25,8 @@ public class LibManSys {
             //BookDAO bookDao = new BookDAO(conn);
             //BorrowDAO borrowDao = new BorrowDAO(conn);
 
-            new Login(conn).setVisible(true);            
-            //login.setLocationRelativeTo(null); //center the frame
-            //login.setVisible(true);            
+            new Login(conn).setVisible(true);     //enable login                   
+            //new Home(conn,"JD Galam").setVisible(true);            
 
         } catch (SQLException ex) {
             ex.printStackTrace();

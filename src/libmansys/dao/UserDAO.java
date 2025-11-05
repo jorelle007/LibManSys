@@ -52,7 +52,7 @@ public class UserDAO {
 //        }
 //        return user;
     //SignUp
-    public boolean signup(UserModel user) throws SQLException {
+    public boolean signUp(UserModel user) throws SQLException {
         String sql = "INSERT INTO tusers (full_name, username, password, security_question, security_answer) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getFull_name());
