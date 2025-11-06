@@ -312,7 +312,7 @@ private String full_name;
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void btnManageStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageStudentActionPerformed
-        new Student().setVisible(true);
+        new Student(conn, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnManageStudentActionPerformed
 
