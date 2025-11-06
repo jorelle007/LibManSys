@@ -1,8 +1,11 @@
 package libmansys.view;
 
 import java.sql.*;
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import libmansys.dao.StudentDAO;
+import libmansys.dao.UserDAO;
 import libmansys.utils.Helper;
 
 public class Student extends javax.swing.JFrame {
@@ -10,7 +13,7 @@ public class Student extends javax.swing.JFrame {
     private StudentDAO studentDAO;
     private Connection conn;
     private String currentUsername;
-    
+
     public Student(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null); // center window
@@ -21,24 +24,42 @@ public class Student extends javax.swing.JFrame {
         this.studentDAO = new StudentDAO(conn); // pag-set ng DAO as single connection
         this.conn = conn;
         this.currentUsername = userName;
-        
-        disableActions();
-        
+
+        disableButtons();
+
+        //get autoincrement ID
+        getNextID(); // optional, can be removed
+
         //fetch student data
         loadStudents();
-        
+
+        //table click behaviour for update/delete
+        tableClick();
+
         //autoresize columns
         Helper.autoResizeColumns(tblStudents);
     }
-    
-    private void disableActions(){
-        btnUpdate.setEnabled(false);
-        btnDelete.setEnabled(false);
+
+    private void getNextID() {
+        txtStudentID.setText(String.valueOf(studentDAO.getNextStudentId()));
         txtStudentID.setEnabled(false);
     }
-    
-    private void loadStudents(){
+
+    private void disableButtons() {
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
+    }
+
+    private void loadStudents() {
         studentDAO.loadStudents(tblStudents);
+    }
+
+    private void clearTextFields() {
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtCourse.setText("");
+        txtContact.setText("");
+        txtEmail.setText("");
     }
 
     @SuppressWarnings("unchecked")
@@ -274,25 +295,160 @@ public class Student extends javax.swing.JFrame {
     }//GEN-LAST:event_txtFirstNameActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-       Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
- 
+        try {
+            if (txtFirstName.getText().isEmpty() || txtLastName.getText().isEmpty() || txtCourse.getText().isEmpty()
+                    || txtContact.getText().isEmpty() || txtEmail.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all required fields!");
+                return;
+            } else {
+                String firstName = txtFirstName.getText();
+                String lastName = txtLastName.getText();
+                String course = txtCourse.getText();
+                String contact = txtContact.getText();
+                String email = txtEmail.getText();
+                LocalDate today = LocalDate.now();
+                Date dateRegistered = Date.valueOf(today);
+
+                studentDAO.addStudent(firstName, lastName, course, contact, email, dateRegistered);
+
+                JOptionPane.showMessageDialog(this, "Student added successfully!");
+                clearTextFields();
+                loadStudents();
+                getNextID();
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error adding student!");
+        }
+
+
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-    
+
+        int row = tblStudents.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a student to update.");
+            return;
+        }
+
+        try {
+
+            String tableFirstName = tblStudents.getValueAt(row, 1).toString();
+            String tableLastName = tblStudents.getValueAt(row, 2).toString();
+            String tableCourse = tblStudents.getValueAt(row, 3).toString();
+            String tableContact = tblStudents.getValueAt(row, 4).toString();
+            String tableEmail = tblStudents.getValueAt(row, 5).toString();
+
+            String firstName = txtFirstName.getText().trim();
+            String lastName = txtLastName.getText().trim();
+            String course = txtCourse.getText().trim();
+            String contact = txtContact.getText().trim();
+            String email = txtEmail.getText().trim();
+
+            if (firstName.isEmpty() || lastName.isEmpty() || course.isEmpty()
+                    || contact.isEmpty() || email.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill out all fields.",
+                        "Form Incomplete", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (firstName.equals(tableFirstName)
+                    && lastName.equals(tableLastName)
+                    && course.equals(tableCourse)
+                    && contact.equals(tableContact)
+                    && email.equals(tableEmail)) {
+                JOptionPane.showMessageDialog(this, "No changes were made.");
+                return;
+            }
+
+            int studentId = Integer.parseInt(tblStudents.getValueAt(row, 0).toString());
+
+            studentDAO.updateStudent(studentId, firstName, lastName, course, contact, email);
+            JOptionPane.showMessageDialog(this, "Student updated successfully!");
+
+            clearTextFields();
+            loadStudents();
+            getNextID();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error updating student: " + e.getMessage());
+        }
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-     
+        int selectedRow = tblStudents.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a student to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        int studentId = Integer.parseInt(txtStudentID.getText().trim());
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to delete this student?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            JPasswordField password = new JPasswordField();
+            int option = JOptionPane.showConfirmDialog(
+                    this, password, "Enter your password to confirm delete",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (option != JOptionPane.OK_OPTION) {
+                return;
+            }
+            String enteredPassword = new String(password.getPassword());
+//            System.out.println("Entered: '" + enteredPassword + "'");
+//            System.out.println("Stored: '" + currentUsername + "'");  //debug if you want to view your password if incorrect
+
+            try {
+
+                if (!enteredPassword.equals(currentUsername)) {
+                    JOptionPane.showMessageDialog(this, "Incorrect password. Delete cancelled.");
+                    return;
+                }
+
+                studentDAO.deleteStudent(studentId);
+                JOptionPane.showMessageDialog(this, "Student deleted successfully!");
+
+                clearTextFields();
+                loadStudents();
+                getNextID();
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error deleting student: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
- 
+    private void tableClick() {
+        tblStudents.getSelectionModel().addListSelectionListener(e -> {
+            int row = tblStudents.getSelectedRow();
+            boolean selected = row != -1;
+
+            btnAdd.setEnabled(!selected);
+            btnUpdate.setEnabled(selected);
+            btnDelete.setEnabled(selected);
+
+            if (selected) {
+                txtStudentID.setText(tblStudents.getValueAt(row, 0).toString());
+                txtFirstName.setText(tblStudents.getValueAt(row, 1).toString());
+                txtLastName.setText(tblStudents.getValueAt(row, 2).toString());
+                txtCourse.setText(tblStudents.getValueAt(row, 3).toString());
+                txtContact.setText(tblStudents.getValueAt(row, 4).toString());
+                txtEmail.setText(tblStudents.getValueAt(row, 5).toString());
+            }
+        });
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;

@@ -14,6 +14,22 @@ public class StudentDAO {
     public StudentDAO(Connection conn) {
         this.conn = conn; // optimize database para magamit lahat ng methods
     }
+    
+    public int getNextStudentId() { //optional.. kunin yung id na naka auto-increment
+        int nextId = 1;
+        String sql = "SHOW TABLE STATUS LIKE 'tstudent'"; //kukunin metadata at yung current auto-increment
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+
+            if (rs.next()) {
+                nextId = rs.getInt("Auto_increment"); 
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching next student ID: " + e.getMessage());
+        }
+        return nextId;
+    }
 
     public void loadStudents(javax.swing.JTable table) { //load sa jtable yung list ng students
         DefaultTableModel model = (DefaultTableModel) table.getModel();
