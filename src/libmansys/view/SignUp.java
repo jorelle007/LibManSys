@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import libmansys.dao.UserDAO;
-import libmansys.model.UserModel;
+import libmansys.model.User;
 import libmansys.utils.Helper;
 
 public class SignUp extends javax.swing.JFrame {
@@ -192,7 +192,7 @@ public class SignUp extends javax.swing.JFrame {
         String security_question = cmbSecurityquestion.getSelectedItem().toString();
         String security_answer = txtSecurityanswer.getText();
 
-        UserModel newUser = new UserModel();
+        User newUser = new User();
         newUser.setFull_name(full_name);
         newUser.setUsername(username);
         newUser.setPassword(password);

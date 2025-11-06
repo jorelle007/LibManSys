@@ -4,31 +4,29 @@ import java.sql.*;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import libmansys.dao.UserDAO;
-import libmansys.model.UserModel;
+import libmansys.model.User;
 
 public class Home extends javax.swing.JFrame {
 
 private Connection conn;
+private String currentUsername;
 private String full_name;
 
     public Home() {
-        this(null, null); // calls the main constructor
+        this(null, null, null); // calls the main constructor
     }
 
     public Home(Connection conn) {
-        this(conn, null); // calls the main constructor
+        this(conn, null, null); // calls the main constructor
     }
 
-    public Home(String full_name) {
-        this(null, full_name); // calls the main constructor
-    }
-
-    public Home(Connection conn, String full_name) { //make it private after enabling the Login form
+    public Home(Connection conn, String userName, String full_name) { //make it private after enabling the Login form
         initComponents();
         pack();
         setLocationRelativeTo(null);
 
         this.conn = conn;
+        this.currentUsername = userName;
         this.full_name = full_name;
         lblFullname.setText(full_name); // ✅ update the label text
     }
@@ -320,7 +318,7 @@ private String full_name;
     }//GEN-LAST:event_btnManageStudentActionPerformed
 
     private void btnManageBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageBookActionPerformed
-        new NewBook().setVisible(true);
+        new NewBook(conn, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnManageBookActionPerformed
 

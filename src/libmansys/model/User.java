@@ -1,8 +1,7 @@
 
 package libmansys.model;
 
-public class UserModel {
-    private int user_id;    
+public class User {  
     private String username;
     private String password;
     private String full_name;
@@ -10,15 +9,12 @@ public class UserModel {
     private String security_question;
     private String security_answer;
     
-    public UserModel() {
+    public User() {
 
     }
     
     
-    //Getters and Setters
-    public int getUser_id() { return user_id; }
-    public void setUser_id(int user_id) { this.user_id = user_id; }
-    
+    //Getters and Setters    
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     

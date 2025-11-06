@@ -22,11 +22,11 @@ public class LibManSys {
 
             // Pass connection to DAOs
             UserDAO userDao = new UserDAO(conn);
-            //BookDAO bookDao = new BookDAO(conn);
+            BookDAO bookDao = new BookDAO(conn);
             //BorrowDAO borrowDao = new BorrowDAO(conn);
 
-            //new Login(conn).setVisible(true);     //enable login                   
-            new Home(conn,"JD Galam").setVisible(true);            
+            new Login(conn).setVisible(true);     //enable login                   
+            //new Home(conn,"JD Galam").setVisible(true);            
 
         } catch (SQLException ex) {
             ex.printStackTrace();

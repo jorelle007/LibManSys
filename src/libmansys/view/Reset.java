@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import libmansys.dao.UserDAO;
-import libmansys.model.UserModel;
+import libmansys.model.User;
 import libmansys.utils.Helper;
 
 public class Reset extends javax.swing.JFrame {
@@ -248,7 +248,7 @@ public class Reset extends javax.swing.JFrame {
         }
 
         try {
-            UserModel user = dao.searchUser(username);
+            User user = dao.searchUser(username);
 
             if (user != null) {
                 txtFullname.setText(user.getFull_name());

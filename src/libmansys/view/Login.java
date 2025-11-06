@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import libmansys.dao.UserDAO;
-import libmansys.model.UserModel;
+import libmansys.model.User;
 
 public class Login extends javax.swing.JFrame {
 
@@ -196,11 +196,11 @@ public class Login extends javax.swing.JFrame {
 
         try {
             UserDAO dao = new UserDAO(conn);
-            UserModel user = dao.login(username, password);
+            User user = dao.login(username, password);
             if (user != null) {
                 JOptionPane.showMessageDialog(this, "Welcome, " + user.getFull_name() + "!");
                 dispose(); // close login form                
-                new Home(user.getFull_name()).setVisible(true); // open Main program
+                new Home(conn, user.getUsername(), user.getFull_name()).setVisible(true); // open Main program
 
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!");

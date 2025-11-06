@@ -1,7 +1,7 @@
 package libmansys.dao;
 
 import java.sql.*;
-import libmansys.model.UserModel;
+import libmansys.model.User;
 
 /**
  * DAO for User-related DB calls
@@ -16,7 +16,7 @@ public class UserDAO {
         this.conn = conn;
     }
 
-    public UserModel login(String username, String password) throws SQLException {
+    public User login(String username, String password) throws SQLException {
         String sql = "{CALL sp_loginUser(?, ?)}"; //call SP
         try (CallableStatement stmt = conn.prepareCall(sql)) {
             stmt.setString(1, username);
@@ -26,7 +26,7 @@ public class UserDAO {
                 try (ResultSet rs = stmt.getResultSet()) {
                     if (rs.next()) {
                         // ✅ user found
-                        UserModel user = new UserModel();                 
+                        User user = new User();                 
                         user.setFull_name(rs.getString("full_name"));                  
                         return user;
                     }
@@ -43,16 +43,16 @@ public class UserDAO {
 //
 //        ResultSet rs = stmt.executeQuery();
 //
-//        UserModel user = null;
+//        User user = null;
 //        if (rs.next()) {
-//            user = new UserModel();
+//            user = new User();
 //            user.setUser_id(rs.getInt("user_id"));
 //            user.setFull_name(rs.getString("full_name"));
 //            user.setRole(rs.getString("role"));
 //        }
 //        return user;
     //SignUp
-    public boolean signUp(UserModel user) throws SQLException {
+    public boolean signUp(User user) throws SQLException {
         String sql = "INSERT INTO tusers (full_name, username, password, security_question, security_answer) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getFull_name());
@@ -70,13 +70,13 @@ public class UserDAO {
     }
 
     // SEARCH USERNAME
-    public UserModel searchUser(String username) throws SQLException {
+    public User searchUser(String username) throws SQLException {
         String sql = "SELECT full_name, security_question FROM tUsers WHERE username = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    UserModel user = new UserModel();
+                    User user = new User();
                     user.setFull_name(rs.getString("full_name"));
                     user.setSecurity_question(rs.getString("security_question"));
                     return user;
