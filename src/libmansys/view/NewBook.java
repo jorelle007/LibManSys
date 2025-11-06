@@ -1,14 +1,17 @@
 package libmansys.view;
 
+import java.awt.Color;
 import java.sql.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import libmansys.dao.BookDAO;
 import libmansys.dao.UserDAO;
 import libmansys.model.Book;
 import libmansys.model.User;
 import libmansys.utils.Helper;
+import org.jdesktop.swingx.prompt.PromptSupport;
 
 public class NewBook extends javax.swing.JFrame {
 
@@ -20,10 +23,19 @@ public class NewBook extends javax.swing.JFrame {
     public NewBook(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null); // center window
+
+        // Right-align money column (e.g., column index 7)
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        tblBook.getColumnModel().getColumn(7).setCellRenderer(rightRenderer);
+
         btnUpdate.setEnabled(false);
         btnDelete.setEnabled(false);
         txtBookID.setEnabled(false);
         tblBook.setDefaultEditor(Object.class, null);
+        PromptSupport.setPrompt("Search by Title, Author, or Category...", txtSearch);
+        PromptSupport.setForeground(Color.GRAY, txtSearch);
+        PromptSupport.setFocusBehavior(PromptSupport.FocusBehavior.SHOW_PROMPT, txtSearch);
 
         if (conn == null) {
             JOptionPane.showMessageDialog(this, "Database connection is null!");
@@ -33,7 +45,11 @@ public class NewBook extends javax.swing.JFrame {
         this.currentUsername = userName;
         this.dao = new BookDAO(conn);
 
+        //Load table data
         loadBookTable();
+
+        // Add live search/filter
+        Helper.addTableFilter(tblBook, txtSearch, 1, 2, 4);
 
         // Optional: auto-resize columns based on content
         Helper.autoResizeColumns(tblBook);
@@ -74,7 +90,7 @@ public class NewBook extends javax.swing.JFrame {
         jPanel2 = new javax.swing.JPanel();
         scpBook = new javax.swing.JScrollPane();
         tblBook = new javax.swing.JTable();
-        jTextField5 = new javax.swing.JTextField();
+        txtSearch = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -105,6 +121,11 @@ public class NewBook extends javax.swing.JFrame {
         btnAdd.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/add.png"))); // NOI18N
         btnAdd.setText("ADD");
+        btnAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddActionPerformed(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel5.setText("Category");
@@ -126,6 +147,9 @@ public class NewBook extends javax.swing.JFrame {
 
         jLabel8.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel8.setText("Quantity");
+
+        txtPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPrice.setText("0.0000");
 
         cboCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "IT / Computer", "Management & Business", "Hospitality & Tourism", "Education & Academia", "Law & Criminology", "Other" }));
         cboCategory.addActionListener(new java.awt.event.ActionListener() {
@@ -169,14 +193,13 @@ public class NewBook extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtPrice)
-                                .addComponent(txtYear)
-                                .addComponent(txtPublisher)
-                                .addComponent(txtAuthor)
-                                .addComponent(txtQuantity)
-                                .addComponent(cboCategory, 0, 208, Short.MAX_VALUE)
-                                .addComponent(txtBookID, javax.swing.GroupLayout.Alignment.TRAILING))))))
+                            .addComponent(txtPrice, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtYear, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtPublisher, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtAuthor, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtQuantity, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cboCategory, javax.swing.GroupLayout.Alignment.LEADING, 0, 208, Short.MAX_VALUE)
+                            .addComponent(txtBookID)))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -260,20 +283,16 @@ public class NewBook extends javax.swing.JFrame {
         });
         scpBook.setViewportView(tblBook);
 
-        jTextField5.setToolTipText("");
-
-        btnSearch.setText("Search");
+        txtSearch.setToolTipText("");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnSearch)
-                .addContainerGap())
+                .addContainerGap()
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(scpBook, javax.swing.GroupLayout.PREFERRED_SIZE, 761, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
@@ -282,13 +301,14 @@ public class NewBook extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(20, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSearch))
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(scpBook, javax.swing.GroupLayout.PREFERRED_SIZE, 474, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
+
+        btnSearch.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnSearch.setText("Clear");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -300,7 +320,8 @@ public class NewBook extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnHome, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearch, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(26, 26, 26))
         );
         layout.setVerticalGroup(
@@ -314,6 +335,8 @@ public class NewBook extends javax.swing.JFrame {
                 .addComponent(btnHome)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -340,7 +363,7 @@ public class NewBook extends javax.swing.JFrame {
     }
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this);
+        Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void cboCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboCategoryActionPerformed
@@ -349,18 +372,18 @@ public class NewBook extends javax.swing.JFrame {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         try {
-            int bookId = Integer.parseInt(txtBookID.getText());
-            String title = txaTitle.getText();
-            String author = txtAuthor.getText();
-            String publisher = txtPublisher.getText();
-            String category = cboCategory.getSelectedItem().toString();
-            int year = Integer.parseInt(txtYear.getText());
-            int quantity = Integer.parseInt(txtQuantity.getText());
-            double price = Double.parseDouble(txtPrice.getText());
+            Book book = getBookFromFields();
+//            int bookId = Integer.parseInt(txtBookID.getText());
+//            String title = txaTitle.getText();
+//            String author = txtAuthor.getText();
+//            String publisher = txtPublisher.getText();
+//            String category = cboCategory.getSelectedItem().toString();
+//            int year = Integer.parseInt(txtYear.getText());
+//            int quantity = Integer.parseInt(txtQuantity.getText());
+//            double price = Double.parseDouble(txtPrice.getText());
 
-            // Create a Book object from these form values
-            Book book = new Book(bookId, title, author, publisher, category, year, quantity, price);
-
+            // Create a Book object from these form values            
+            //Book book = new Book(bookId, title, author, publisher, category, year, quantity, price);
             // Then pass it to your DAO
             boolean isUpdated = dao.updateBook(book);
 
@@ -395,15 +418,117 @@ public class NewBook extends javax.swing.JFrame {
     }//GEN-LAST:event_tblBookMouseClicked
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-  
+        int selectedRow = tblBook.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a book to delete.");
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to delete this book?",
+                "Confirm Delete",
+                JOptionPane.YES_NO_OPTION
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            JPasswordField pwdField = new JPasswordField();
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    pwdField,
+                    "Enter your password to confirm delete",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (option != JOptionPane.OK_OPTION) {
+                return; // user canceled 
+            }
+            String enteredPassword = new String(pwdField.getPassword());
+
+            try {
+                // Step 2: Verify password in the database
+                UserDAO userDao = new UserDAO(conn);
+                User confirmUser = userDao.login(currentUsername, enteredPassword);
+
+                if (confirmUser == null) {
+                    JOptionPane.showMessageDialog(this, "Incorrect password. Delete cancelled.");
+                    return;
+                }
+
+                int bookId = Integer.parseInt(txtBookID.getText());
+                String title = txaTitle.getText();
+                boolean isDeleted = dao.deleteBook(bookId);
+
+                if (isDeleted) {
+                    JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
+                    loadBookTable();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+            }
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
+    private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
+        if (!validateBookFields()) {
+            return;
+        }
+
+        // Check if combo box is default
+        boolean comboDefault = cboCategory.getSelectedIndex() == 0; // or your default index
+
+        // Check if price is default (e.g., 0.0)
+        boolean priceDefault = txtPrice.getText().trim().isEmpty() || txtPrice.getText().trim().equals("0")
+                || txtPrice.getText().trim().equals("0");
+
+        if (comboDefault || priceDefault) {
+            String message = "The following fields are still at their default values:\n";
+            if (comboDefault) {
+                message += "- Category\n";
+            }
+            if (priceDefault) {
+                message += "- Price\n";
+            }
+            message += "Do you want to continue?";
+
+            int option = JOptionPane.showConfirmDialog(
+                    this,
+                    message,
+                    "Warning",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (option != JOptionPane.YES_OPTION) {
+                return; // user chose not to continue
+            }
+        }
+
+        Book book = getBookFromFields();
+
+        try {
+            boolean isAdded = dao.addBook(book);
+
+            if (isAdded) {
+                JOptionPane.showMessageDialog(this, "Book added successfully!");
+                loadBookTable();
+                clearBookFields();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add the book");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnAddActionPerformed
+
+    //Private Helper methods
     private void selectBookRow() {
         selectedRow = tblBook.getSelectedRow();
 
         if (selectedRow != -1) {
             btnUpdate.setEnabled(true);
             btnDelete.setEnabled(true);
+            btnAdd.setEnabled(false);
 
             txtBookID.setText(tblBook.getValueAt(selectedRow, 0).toString());
             txaTitle.setText(tblBook.getValueAt(selectedRow, 1).toString());
@@ -429,6 +554,85 @@ public class NewBook extends javax.swing.JFrame {
         txtYear.setText("");
         txtQuantity.setText("");
         txtPrice.setText("");
+    }
+
+    private Book getBookFromFields() {
+        Book book = new Book();
+
+        // If your Book has bookId (for update)
+        if (!txtBookID.getText().isEmpty()) {
+            book.setBookId(Integer.parseInt(txtBookID.getText()));
+        }
+
+        book.setTitle(txaTitle.getText());
+        book.setAuthor(txtAuthor.getText());
+        book.setPublisher(txtPublisher.getText());
+        book.setCategory(cboCategory.getSelectedItem().toString());
+
+        // Validate numeric fields
+        try {
+            book.setYear(Integer.parseInt(txtYear.getText()));
+        } catch (NumberFormatException e) {
+            book.setYear(0); // or handle properly
+        }
+
+        try {
+            book.setQuantity(Integer.parseInt(txtQuantity.getText()));
+        } catch (NumberFormatException e) {
+            book.setQuantity(0);
+        }
+
+        try {
+            book.setBookPrice(Double.parseDouble(txtPrice.getText()));
+        } catch (NumberFormatException e) {
+            book.setBookPrice(0.0);
+        }
+
+        return book;
+    }
+
+    private boolean validateBookFields() {
+        // Text fields
+        if (txaTitle.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Title is required.");
+            txaTitle.requestFocus();
+            return false;
+        }
+        if (txtAuthor.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Author is required.");
+            txtAuthor.requestFocus();
+            return false;
+        }
+        if (txtPublisher.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Publisher is required.");
+            txtPublisher.requestFocus();
+            return false;
+        }
+
+        // Numeric fields
+        try {
+            int year = Integer.parseInt(txtYear.getText().trim());
+            int currentYear = java.time.Year.now().getValue();
+            if (year < 1900 || year > java.time.Year.now().getValue()) {
+                JOptionPane.showConfirmDialog(this, "Year must be between 1900 and "
+                        + currentYear);
+                txtYear.requestFocus();
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Year must be a number.");
+            txtYear.requestFocus();
+            return false;
+        }
+
+        try {
+            int quantity = Integer.parseInt(txtQuantity.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Quantity must be a number.");
+            txtQuantity.requestFocus();
+            return false;
+        }
+
+        return true; // all validations passed
     }
 
     /**
@@ -484,7 +688,6 @@ public class NewBook extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JScrollPane scpBook;
     private javax.swing.JTable tblBook;
     private javax.swing.JTextArea txaTitle;
@@ -493,6 +696,7 @@ public class NewBook extends javax.swing.JFrame {
     private javax.swing.JTextField txtPrice;
     private javax.swing.JTextField txtPublisher;
     private javax.swing.JTextField txtQuantity;
+    private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtYear;
     // End of variables declaration//GEN-END:variables
 }

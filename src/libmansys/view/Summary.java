@@ -171,7 +171,7 @@ public class Summary extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this);
+        //Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     /**

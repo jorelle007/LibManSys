@@ -237,7 +237,7 @@ public class Student extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this);
+        //Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     /**

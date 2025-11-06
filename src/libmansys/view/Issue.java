@@ -204,7 +204,7 @@ public class Issue extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this);
+        //Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     /**

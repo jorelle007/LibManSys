@@ -44,6 +44,25 @@ public class BookDAO {
         return books;
     }
 
+    //Add Book
+    public boolean addBook(Book book) throws SQLException {
+        String sql = "INSERT INTO tBook (title, author, publisher, category, year_published, quantity, price) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getAuthor());
+            stmt.setString(3, book.getPublisher());
+            stmt.setString(4, book.getCategory());
+            stmt.setInt(5, book.getYear());
+            stmt.setInt(6, book.getQuantity());
+            stmt.setDouble(7, book.getBookPrice());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0; // true if the insert was successful
+        }
+    }
+
     //Update Book
     public boolean updateBook(Book book) throws SQLException {
         // get the current book from database
@@ -78,15 +97,15 @@ public class BookDAO {
             return rows > 0;
         }
     }
-    
+
     //Delete Book
     public boolean deleteBook(int bookId) throws SQLException {
-        String sql = "DELETE FROM tBook WHERE book_id = ?";        
+        String sql = "DELETE FROM tBook WHERE book_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, bookId);
-            int rowsAffected = stmt.executeUpdate(sql);
+            int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
-        }        
+        }
     }
 
     //helper method to get a book record by Id

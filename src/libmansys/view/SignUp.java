@@ -227,7 +227,7 @@ public class SignUp extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCreateActionPerformed
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
-        Helper.goBackToLogin(this);
+        Helper.goBackToLogin(this, conn);
     }//GEN-LAST:event_btnBackActionPerformed
 
 

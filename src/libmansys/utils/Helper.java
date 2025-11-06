@@ -1,26 +1,26 @@
 package libmansys.utils;
 
 import java.awt.Component;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
+import java.sql.Connection;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.table.*;
+import javax.swing.event.*;
 import libmansys.view.*;
 
 public class Helper {
 
-    public static void goBackToLogin(JFrame currentFrame) {
-        new Login().setVisible(true);
+    private Connection conn;
+
+    public static void goBackToLogin(JFrame currentFrame, Connection conn) {
+        new Login(conn).setVisible(true);
         currentFrame.dispose();
     }
 
-    public static void goBackToHome(JFrame currentFrame) {
-        new Home().setVisible(true);
+    public static void goBackToHome(JFrame currentFrame, Connection conn) {
+        new Home(conn).setVisible(true);
         currentFrame.dispose();
     }
-
-
 
     // Auto-adjust column widths based on content
     public static void autoResizeColumns(JTable table) {
@@ -49,5 +49,35 @@ public class Helper {
 
             column.setPreferredWidth(width + margin);
         }
+    }
+    
+    public static void addTableFilter(JTable table, JTextField textField, int... filterColumns) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+
+        textField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { filter(); }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) { filter(); }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) { filter(); }
+
+            private void filter() {
+                String text = textField.getText().trim();
+                if (text.isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    List<RowFilter<Object,Object>> filters = new ArrayList<>();
+                    for (int col : filterColumns) {
+                        filters.add(RowFilter.regexFilter("(?i)" + text, col));
+                    }
+                    sorter.setRowFilter(RowFilter.orFilter(filters));
+                }
+            }
+        });
     }
 }
