@@ -3,6 +3,7 @@ package libmansys.utils;
 import java.awt.Component;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import java.sql.Connection;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -49,5 +50,9 @@ public class Helper {
 
             column.setPreferredWidth(width + margin);
         }
+    }
+
+    public static void goBackToHome(NewBook This, Connection conn, String currentUsername) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

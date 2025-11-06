@@ -9,7 +9,6 @@ import libmansys.utils.Helper;
 
 public class SignUp extends javax.swing.JFrame {
 
-
     private Connection conn;
 
     public SignUp(Connection conn) {
@@ -212,19 +211,20 @@ public class SignUp extends javax.swing.JFrame {
         try {
             UserDAO dao = new UserDAO(conn);
             boolean success = dao.signUp(newUser);
-            
+
             if (success) {
                 JOptionPane.showMessageDialog(this, "User created successfully!");
                 this.setVisible(false);
-                new Login(conn).setVisible(true);  
+                new Login(conn).setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to create user.");
-            } 
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-        }    
+        }
     }//GEN-LAST:event_btnCreateActionPerformed
+
 
     private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
         Helper.goBackToLogin(this);

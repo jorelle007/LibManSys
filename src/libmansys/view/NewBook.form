@@ -97,15 +97,13 @@
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" max="-2" attributes="0">
                               <Component id="jScrollPane1" pref="208" max="32767" attributes="0"/>
-                              <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="txtPrice" max="32767" attributes="0"/>
-                                  <Component id="txtYear" max="32767" attributes="0"/>
-                                  <Component id="txtPublisher" max="32767" attributes="0"/>
-                                  <Component id="txtAuthor" max="32767" attributes="0"/>
-                                  <Component id="txtQuantity" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="cboCategory" alignment="0" pref="208" max="32767" attributes="0"/>
-                                  <Component id="txtBookID" alignment="1" max="32767" attributes="0"/>
-                              </Group>
+                              <Component id="txtPrice" alignment="0" max="32767" attributes="0"/>
+                              <Component id="txtYear" alignment="0" max="32767" attributes="0"/>
+                              <Component id="txtPublisher" alignment="0" max="32767" attributes="0"/>
+                              <Component id="txtAuthor" alignment="0" max="32767" attributes="0"/>
+                              <Component id="txtQuantity" alignment="0" max="32767" attributes="0"/>
+                              <Component id="cboCategory" alignment="0" pref="208" max="32767" attributes="0"/>
+                              <Component id="txtBookID" alignment="1" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -229,6 +227,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="ADD"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnAddActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel5">
           <Properties>
@@ -313,7 +314,7 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JTextArea" name="txaTitle">
+            <Component class="javax.swing.JTextArea" name="txtTitle">
               <Properties>
                 <Property name="columns" type="int" value="20"/>
                 <Property name="lineWrap" type="boolean" value="true"/>
