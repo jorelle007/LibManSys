@@ -68,7 +68,6 @@ private String full_name;
         jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 750));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Logo3.png"))); // NOI18N
 

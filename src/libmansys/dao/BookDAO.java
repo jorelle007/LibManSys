@@ -18,6 +18,60 @@ public class BookDAO {
         this.conn = conn;
     }
 
+    public int getNextBookId() { // pangkuha ng auto_increment id sa database 
+        int nextId = 1;
+        String sql = "SHOW TABLE STATUS LIKE 'tbook'";
+
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+
+            if (rs.next()) {
+                nextId = rs.getInt("Auto_increment");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Cannot add book: " + e.getMessage());
+        }
+
+        return nextId;
+    }
+
+    public int addNewBook(String title, String author, String publisher, // pag add sa books
+            String category, int year, int quantity, double price) {
+
+        String sql = "INSERT INTO tbook (title, author, publisher, category, year_published, quantity, price) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        int generatedId = -1;
+
+        try (PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pst.setString(1, title);
+            pst.setString(2, author);
+            pst.setString(3, publisher);
+            pst.setString(4, category);
+            pst.setInt(5, year);
+            pst.setInt(6, quantity);
+            pst.setDouble(7, price);
+
+            int rows = pst.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("New book added successfully!");
+
+                ResultSet rs = pst.getGeneratedKeys();
+                if (rs.next()) {
+                    generatedId = rs.getInt(1);
+                }
+            } else {
+                System.out.println("Failed to add new book");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error adding book: " + e.getMessage());
+        }
+        return generatedId;
+    }
+
     public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM tBook";
