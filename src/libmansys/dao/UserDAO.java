@@ -26,8 +26,9 @@ public class UserDAO {
                 try (ResultSet rs = stmt.getResultSet()) {
                     if (rs.next()) {
                         // ✅ user found
-                        User user = new User();                 
-                        user.setFull_name(rs.getString("full_name"));                  
+                        User user = new User();
+                        user.setFull_name(rs.getString("full_name"));
+                        user.setUsername(username);
                         return user;
                     }
                 }
@@ -91,8 +92,8 @@ public class UserDAO {
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, username);
         stmt.setString(2, security_answer);
-        ResultSet rs = stmt.executeQuery(); 
-    
+        ResultSet rs = stmt.executeQuery();
+
         return rs.next();
     }
 
