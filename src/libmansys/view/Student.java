@@ -39,6 +39,7 @@ public class Student extends javax.swing.JFrame {
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setHorizontalAlignment(JLabel.CENTER);
         renderer.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10)); // padding
+        Helper.autoResizeColumns(tblStudents);
 
         for (int i = 0; i < tblStudents.getColumnCount(); i++) {
             tblStudents.getColumnModel().getColumn(i).setCellRenderer(renderer);
