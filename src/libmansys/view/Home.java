@@ -8,9 +8,9 @@ import libmansys.model.User;
 
 public class Home extends javax.swing.JFrame {
 
-private Connection conn;
-private String currentUsername;
-private String full_name;
+    private Connection conn;
+    private String currentUsername;
+    private String full_name;
 
     public Home() {
         this(null, null, null); // calls the main constructor
@@ -30,7 +30,6 @@ private String full_name;
         this.full_name = full_name;
         lblFullname.setText(full_name); // ✅ update the label text
     }
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -322,7 +321,7 @@ private String full_name;
     }//GEN-LAST:event_btnManageBookActionPerformed
 
     private void btnSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSummaryActionPerformed
-        new Summary().setVisible(true);
+        new Summary(conn, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnSummaryActionPerformed
 
@@ -350,7 +349,7 @@ private String full_name;
                 null,
                 options,
                 options[1]);
-        
+
         if (option == 0) {
             this.dispose();
             new Login().setVisible(true);
@@ -388,7 +387,7 @@ private String full_name;
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Home().setVisible(true);
-                
+
             }
         });
     }

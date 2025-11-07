@@ -3,17 +3,58 @@ package libmansys.view;
 import java.sql.*;
 import javax.swing.JOptionPane;
 import libmansys.utils.Helper;
+import libmansys.dao.SummaryBorrowDAO;
+import libmansys.dao.SummaryReturnDAO;
 
 public class Summary extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Summary
-     */
-    public Summary() {
+    private SummaryBorrowDAO borrowDAO;   // DAO for borrowed books
+    private SummaryReturnDAO returnDAO;    // DAO for returned books
+    private Connection conn;
+    private String currentUsername;
+
+    public Summary(Connection conn, String userName) {
         initComponents();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null); // center the window
+
+        if (conn == null) {
+            JOptionPane.showMessageDialog(this, "Database connection is null!");
+            return;
+        }
+
+        this.conn = conn;
+        this.currentUsername = userName;
+
+        // Initialize DAOs using the same connection
+        this.borrowDAO = new SummaryBorrowDAO(conn);
+        this.returnDAO = new SummaryReturnDAO(conn);
+
+        // Load data into tables
+        loadBorrowedBooks();
+        loadReturnedBooks();
+
+        // Optional: auto-resize columns like in Student JFrame
+        Helper.autoResizeColumns(jTable1);
+        Helper.autoResizeColumns(jTable2);
     }
 
+    private void loadBorrowedBooks() {
+        try {
+            borrowDAO.loadBorrowed(jTable1);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading borrowed books: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadReturnedBooks() {
+        try {
+            returnDAO.loadReturned(jTable2);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading returned books: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -49,7 +90,7 @@ public class Summary extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "BTR ID", "Book ID", "Student ID", "Librarian Name", "Borrow date", "Due date", "Status"
+                "BTR ID", "Student ID", "Book ID", "Borrow Date", "Due Date", "Status", "User ID"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -84,13 +125,13 @@ public class Summary extends javax.swing.JFrame {
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Return ID", "BTR ID", "Return date", "Condition", "Days overdue", "Penalty"
+                "Return ID", "BTR ID", "Return date", "Condition", "Days overdue", "Penalty", "User ID"
             }
         ));
         jScrollPane2.setViewportView(jTable2);
@@ -171,43 +212,9 @@ public class Summary extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        //Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Summary.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Summary.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Summary.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Summary.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Summary().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnHome;
