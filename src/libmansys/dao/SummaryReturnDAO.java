@@ -1,6 +1,7 @@
 package libmansys.dao;
 
 import java.sql.*;
+import java.util.Date;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -15,10 +16,11 @@ public class SummaryReturnDAO {
         this.conn = conn;
     }
 
-    /**
-     * Load all returned books into the JTable
-     */
     public void loadReturned(JTable table) {
+        loadReturned(table, null, null);
+    }
+
+    public void loadReturned(JTable table, Date fromDate, Date toDate) {
         String sql
                 = "SELECT "
                 + "r.return_id, "
@@ -29,26 +31,47 @@ public class SummaryReturnDAO {
                 + "r.days_overdue, "
                 + "r.penalty, "
                 + "r.user_id "
-                + "FROM tReturn r "
-                + "JOIN tBTR b ON r.btr_id = b.btr_id "
-                + "JOIN tStudent s ON b.student_id = s.student_id";
+                + "FROM treturn r "
+                + "JOIN tbtr b ON r.btr_id = b.btr_id "
+                + "JOIN tstudent s ON b.student_id = s.student_id";
+
+        if (fromDate != null || toDate != null) {
+            sql += " WHERE 1=1";
+            if (fromDate != null) {
+                sql += " AND r.return_date >= ?";
+            }
+            if (toDate != null) {
+                sql += " AND r.return_date <= ?";
+            }
+        }
+
+        sql += " ORDER BY r.return_date DESC";
 
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
 
-        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int paramIndex = 1;
+            if (fromDate != null) {
+                pstmt.setDate(paramIndex++, new java.sql.Date(fromDate.getTime()));
+            }
+            if (toDate != null) {
+                pstmt.setDate(paramIndex++, new java.sql.Date(toDate.getTime()));
+            }
 
-            while (rs.next()) {
-                Object[] row = new Object[]{
-                    rs.getInt("return_id"),
-                    rs.getInt("btr_id"),
-                    rs.getDate("return_date"),
-                    rs.getString("condition_on_return"),
-                    rs.getInt("days_overdue"),
-                    rs.getBigDecimal("penalty"),
-                    rs.getString("student_name"),
-                };
-                model.addRow(row);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = new Object[]{
+                        rs.getInt("return_id"),
+                        rs.getInt("btr_id"),
+                        rs.getDate("return_date"),
+                        rs.getString("condition_on_return"),
+                        rs.getInt("days_overdue"),
+                        rs.getBigDecimal("penalty"),
+                        rs.getString("student_name"),
+                    };
+                    model.addRow(row);
+                }
             }
 
         } catch (SQLException ex) {
