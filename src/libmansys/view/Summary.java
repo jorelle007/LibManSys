@@ -6,6 +6,11 @@ import libmansys.utils.Helper;
 import libmansys.dao.SummaryBorrowDAO;
 import libmansys.dao.SummaryReturnDAO;
 
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
 public class Summary extends javax.swing.JFrame {
 
     private SummaryBorrowDAO borrowDAO;   // DAO for borrowed books
@@ -41,6 +46,7 @@ public class Summary extends javax.swing.JFrame {
     private void loadBorrowedBooks() {
         try {
             borrowDAO.loadBorrowed(jTable1);
+            alignTableColumnCenter(jTable1, 6); // Student Name
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading borrowed books: " + e.getMessage());
             e.printStackTrace();
@@ -50,11 +56,26 @@ public class Summary extends javax.swing.JFrame {
     private void loadReturnedBooks() {
         try {
             returnDAO.loadReturned(jTable2);
+            alignTableColumnRight(jTable2, 5); // Penalty
+            alignTableColumnCenter(jTable2, 6); // Student Name
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading returned books: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    private void alignTableColumnRight(JTable table, int columnIndex) {
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        table.getColumnModel().getColumn(columnIndex).setCellRenderer(rightRenderer);
+    }
+
+    private void alignTableColumnCenter(JTable table, int columnIndex) {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table.getColumnModel().getColumn(columnIndex).setCellRenderer(centerRenderer);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -90,7 +111,7 @@ public class Summary extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "BTR ID", "Student ID", "Book ID", "Borrow Date", "Due Date", "Status", "User ID"
+                "BTR ID", "Student ID", "Book ID", "Borrow Date", "Due Date", "Status", "Student Name"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -131,7 +152,7 @@ public class Summary extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Return ID", "BTR ID", "Return date", "Condition", "Days overdue", "Penalty", "User ID"
+                "Return ID", "BTR ID", "Return date", "Condition", "Days overdue", "Penalty", "Student Name"
             }
         ));
         jScrollPane2.setViewportView(jTable2);

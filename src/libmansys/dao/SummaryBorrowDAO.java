@@ -19,7 +19,17 @@ public class SummaryBorrowDAO {
      * Load all borrowed books into the JTable
      */
     public void loadBorrowed(JTable table) throws SQLException {
-        String sql = "SELECT btr_id, student_id, book_id, borrow_date, due_date, status, user_id FROM tbtr";
+        String sql
+                = "SELECT b.btr_id, "
+                + "CONCAT(s.first_name, ' ', s.last_name) AS student_name, "
+                + "b.book_id, "
+                + "b.student_id, "
+                + "b.borrow_date, "
+                + "b.due_date, "
+                + "b.status, "
+                + "b.user_id "
+                + "FROM tBTR b "
+                + "JOIN tStudent s ON b.student_id = s.student_id";
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -34,10 +44,16 @@ public class SummaryBorrowDAO {
                     rs.getDate("borrow_date"),
                     rs.getDate("due_date"),
                     rs.getString("status"),
-                    rs.getInt("user_id")
+                    rs.getString("student_name")
                 };
                 model.addRow(row);
             }
+        } catch (SQLException ex) {
+            System.err.println("SQL failed. Query:\n" + sql);
+            System.err.println("SQLException message: " + ex.getMessage());
+            System.err.println("SQLState: " + ex.getSQLState());
+            System.err.println("ErrorCode: " + ex.getErrorCode());
+            ex.printStackTrace();
         }
     }
 }

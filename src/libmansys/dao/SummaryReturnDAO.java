@@ -18,15 +18,25 @@ public class SummaryReturnDAO {
     /**
      * Load all returned books into the JTable
      */
-    public void loadReturned(JTable table) throws SQLException {
-        String sql = "SELECT r.return_id, r.btr_id, r.return_date, r.condition_on_return, r.days_overdue, r.penalty, r.user_id "
-                   + "FROM tReturn r";
+    public void loadReturned(JTable table) {
+        String sql
+                = "SELECT "
+                + "r.return_id, "
+                + "r.btr_id, "
+                + "CONCAT(s.first_name, ' ', s.last_name) AS student_name, "
+                + "r.return_date, "
+                + "r.condition_on_return, "
+                + "r.days_overdue, "
+                + "r.penalty, "
+                + "r.user_id "
+                + "FROM tReturn r "
+                + "JOIN tBTR b ON r.btr_id = b.btr_id "
+                + "JOIN tStudent s ON b.student_id = s.student_id";
 
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
 
-            DefaultTableModel model = (DefaultTableModel) table.getModel();
-            model.setRowCount(0); // clear existing rows
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Object[] row = new Object[]{
@@ -36,10 +46,18 @@ public class SummaryReturnDAO {
                     rs.getString("condition_on_return"),
                     rs.getInt("days_overdue"),
                     rs.getBigDecimal("penalty"),
-                    rs.getInt("user_id")
+                    rs.getString("student_name"),
                 };
                 model.addRow(row);
             }
+
+        } catch (SQLException ex) {
+            System.err.println("SQL failed. Query:\n" + sql);
+            System.err.println("SQLException message: " + ex.getMessage());
+            System.err.println("SQLState: " + ex.getSQLState());
+            System.err.println("ErrorCode: " + ex.getErrorCode());
+            ex.printStackTrace();
         }
     }
+
 }
