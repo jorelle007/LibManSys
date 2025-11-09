@@ -26,11 +26,9 @@ public class UserDAO {
                 try (ResultSet rs = stmt.getResultSet()) {
                     if (rs.next()) {
                         // ✅ user found
-<<<<<<< HEAD
-                        User user = new User();                 
-=======
+
                         User user = new User();
->>>>>>> 051644fd614a8447000144d464c33f5d5a87ca79
+
                         user.setFull_name(rs.getString("full_name"));
                         user.setUsername(username);
                         return user;
