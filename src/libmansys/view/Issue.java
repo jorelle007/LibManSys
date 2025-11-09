@@ -514,7 +514,7 @@ public class Issue extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn, currentUserName);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void txtBookIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBookIDActionPerformed
