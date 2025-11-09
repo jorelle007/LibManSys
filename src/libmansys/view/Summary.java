@@ -1,6 +1,7 @@
 package libmansys.view;
 
 import java.sql.*;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import libmansys.utils.Helper;
 import libmansys.dao.SummaryBorrowDAO;
@@ -45,8 +46,20 @@ public class Summary extends javax.swing.JFrame {
 
     private void loadBorrowedBooks() {
         try {
-            borrowDAO.loadBorrowed(jTable1);
-            alignTableColumnCenter(jTable1, 6); // Student Name
+            Date fromDate = dateFromBorrowed.getDate();
+            Date toDate = dateToBorrowed.getDate();
+            
+            // Validate date range
+            if (fromDate != null && toDate != null && fromDate.after(toDate)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Invalid date range!\nThe 'From' date cannot be greater than the 'To' date.", 
+                    "Date Range Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            borrowDAO.loadBorrowed(jTable1, fromDate, toDate);
+            alignTableColumnCenter(jTable1, 6);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading borrowed books: " + e.getMessage());
             e.printStackTrace();
@@ -55,9 +68,21 @@ public class Summary extends javax.swing.JFrame {
 
     private void loadReturnedBooks() {
         try {
-            returnDAO.loadReturned(jTable2);
-            alignTableColumnRight(jTable2, 5); // Penalty
-            alignTableColumnCenter(jTable2, 6); // Student Name
+            Date fromDate = dateFromReturned.getDate();
+            Date toDate = dateToReturned.getDate();
+            
+            // Validate date range
+            if (fromDate != null && toDate != null && fromDate.after(toDate)) {
+                JOptionPane.showMessageDialog(this, 
+                    "Invalid date range!\nThe 'From' date cannot be greater than the 'To' date.", 
+                    "Date Range Error", 
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            returnDAO.loadReturned(jTable2, fromDate, toDate);
+            alignTableColumnRight(jTable2, 5);
+            alignTableColumnCenter(jTable2, 6);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error loading returned books: " + e.getMessage());
             e.printStackTrace();
@@ -90,10 +115,20 @@ public class Summary extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jLabel3 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        dateFromBorrowed = new com.toedter.calendar.JDateChooser();
+        dateToBorrowed = new com.toedter.calendar.JDateChooser();
+        btnFilterBorrowed = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        dateFromReturned = new com.toedter.calendar.JDateChooser();
+        dateToReturned = new com.toedter.calendar.JDateChooser();
+        btnFilterReturned = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         btnHome = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
@@ -119,24 +154,54 @@ public class Summary extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel3.setText("Date");
 
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel5.setText("From:");
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel6.setText("To:");
+
+        btnFilterBorrowed.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnFilterBorrowed.setText("Filter");
+        btnFilterBorrowed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFilterBorrowedActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(244, 244, 244)
-                .addComponent(jLabel3)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 899, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(jLabel3)
+                .addGap(30, 30, 30)
+                .addComponent(jLabel5)
+                .addGap(10, 10, 10)
+                .addComponent(dateFromBorrowed, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabel6)
+                .addGap(10, 10, 10)
+                .addComponent(dateToBorrowed, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(btnFilterBorrowed)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(23, Short.MAX_VALUE)
-                .addComponent(jLabel3)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel5)
+                    .addComponent(dateFromBorrowed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(dateToBorrowed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnFilterBorrowed))
                 .addGap(19, 19, 19)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5))
@@ -160,6 +225,20 @@ public class Summary extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel4.setText("Date");
 
+        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel7.setText("From:");
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        jLabel8.setText("To:");
+
+        btnFilterReturned.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnFilterReturned.setText("Filter");
+        btnFilterReturned.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFilterReturnedActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -168,16 +247,32 @@ public class Summary extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane2)
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(334, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(50, 50, 50)
                 .addComponent(jLabel4)
-                .addGap(545, 545, 545))
+                .addGap(30, 30, 30)
+                .addComponent(jLabel7)
+                .addGap(10, 10, 10)
+                .addComponent(dateFromReturned, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jLabel8)
+                .addGap(10, 10, 10)
+                .addComponent(dateToReturned, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(btnFilterReturned)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(20, 20, 20)
-                .addComponent(jLabel4)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel7)
+                    .addComponent(dateFromReturned, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8)
+                    .addComponent(dateToReturned, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnFilterReturned))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 391, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -236,13 +331,27 @@ public class Summary extends javax.swing.JFrame {
         Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
 
+    private void btnFilterBorrowedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilterBorrowedActionPerformed
+        loadBorrowedBooks();
+    }//GEN-LAST:event_btnFilterBorrowedActionPerformed
+
+    private void btnFilterReturnedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilterReturnedActionPerformed
+        loadReturnedBooks();
+    }//GEN-LAST:event_btnFilterReturnedActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnHome;
+    private javax.swing.JButton btnFilterBorrowed;
+    private javax.swing.JButton btnFilterReturned;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -250,5 +359,9 @@ public class Summary extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private com.toedter.calendar.JDateChooser dateFromBorrowed;
+    private com.toedter.calendar.JDateChooser dateToBorrowed;
+    private com.toedter.calendar.JDateChooser dateFromReturned;
+    private com.toedter.calendar.JDateChooser dateToReturned;
     // End of variables declaration//GEN-END:variables
 }
