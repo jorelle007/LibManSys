@@ -379,7 +379,7 @@ public class NewBook extends javax.swing.JFrame {
     }
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn, currentUsername);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void cboCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboCategoryActionPerformed

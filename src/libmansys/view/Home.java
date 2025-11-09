@@ -28,7 +28,7 @@ public class Home extends javax.swing.JFrame {
         this.conn = conn;
         this.currentUsername = userName;
         this.full_name = full_name;
-        lblFullname.setText(full_name); // ✅ update the label text
+        lblFullname.setText(full_name != null ? full_name : "");
     }
 
     /**
