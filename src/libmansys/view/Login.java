@@ -14,6 +14,8 @@ public class Login extends javax.swing.JFrame {
         initComponents();
         pack();            // adjust to preferred size
         setLocationRelativeTo(null); // center window
+        // Set the login button as the default button
+        getRootPane().setDefaultButton(btnLogin);
     }
 
     public Login(Connection conn) {

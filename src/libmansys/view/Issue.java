@@ -29,6 +29,7 @@ public class Issue extends javax.swing.JFrame {
     private String bookStatus = "Borrowed";
     private String currentUserName;
     private boolean isComplete;
+    private int unreturnedRowCount;
 
     public Issue() {
 
@@ -526,33 +527,41 @@ public class Issue extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        isComplete = validateBookStudentID();
-
         if (isComplete == true) {
 
-            int studentID = Integer.parseInt(selectedStudentID);
-            int bookID = Integer.parseInt(selectedBookID);
-
-            boolean isBTRSaved = issueDao.saveBTR(studentID, bookID,
-                    borrowDate, dueDate, bookStatus, currentUserName);
-
-            if (isBTRSaved) {
+            //After populating, check if the student already has 3 unreturned books
+            if (unreturnedRowCount >= 3) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Book borrowed successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
+                        "This student is not eligible to borrow more books.",
+                        "Borrow Limit Reached",
+                        JOptionPane.WARNING_MESSAGE
                 );
             } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Unable to complete the transaction.",
-                        "Borrow Failed",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }
+                int studentID = Integer.parseInt(selectedStudentID);
+                int bookID = Integer.parseInt(selectedBookID);
 
-            loadUnreturnedBooks();
+                boolean isBTRSaved = issueDao.saveBTR(studentID, bookID,
+                        borrowDate, dueDate, bookStatus, currentUserName);
+
+                if (isBTRSaved) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Book borrowed successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Unable to complete the transaction.",
+                            "Borrow Failed",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+
+                loadUnreturnedBooks();
+            }
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -583,8 +592,17 @@ public class Issue extends javax.swing.JFrame {
 
     private void btnSearchStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchStudentActionPerformed
         String keyword = txtSearchKeyword.getText().trim();
-        SearchStudent searchStudent = new SearchStudent(this, conn, keyword);
-        searchStudent.setVisible(true);
+
+        if (keyword != null && !keyword.isEmpty()) {
+            SearchStudent searchStudent = new SearchStudent(this, conn, keyword);
+            searchStudent.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                    "Please enter a student ID, first name, or last name to search.",
+                    "Empty Search",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+
 
     }//GEN-LAST:event_btnSearchStudentActionPerformed
 
@@ -595,9 +613,6 @@ public class Issue extends javax.swing.JFrame {
 
     private void tblUnreturnedBooksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblUnreturnedBooksMouseClicked
         selectUnreturnedBookRow();
-        if (isComplete == true) {
-            btnSave.setEnabled(true);
-        }
     }//GEN-LAST:event_tblUnreturnedBooksMouseClicked
 
     private void initAvailableBooksTable() {
@@ -710,6 +725,8 @@ public class Issue extends javax.swing.JFrame {
         dtBorrowDate.setDate(null);
         dtDueDate.setDate(null);
         btnClear.setEnabled(false);
+        btnSave.setEnabled(false);
+        this.selectedBookID = "";
     }
 
     private void clearStudentDetails() {
@@ -724,6 +741,8 @@ public class Issue extends javax.swing.JFrame {
         txtCourse.setText("");
         txtEmail.setText("");
         btnClear.setEnabled(false);
+        btnSave.setEnabled(false);
+        this.selectedStudentID = "";
     }
 
     public void selectedStudent(String studentID, String firstName, String lastName, String course, String email) {
@@ -737,6 +756,12 @@ public class Issue extends javax.swing.JFrame {
 
         // Load unreturned books for this student
         loadUnreturnedBooks();
+
+        isComplete = validateBookStudentID();
+        if (isComplete == true) {
+            btnSave.setEnabled(true);
+        }
+
     }
 
     private void loadUnreturnedBooks() {
@@ -750,19 +775,7 @@ public class Issue extends javax.swing.JFrame {
                 unreturnedBooksTbl.addRow(row);
             }
 
-            // After populating, check if the student already has 3 unreturned books
-            if (unreturnedBooksTbl.getRowCount() == 3) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "This student is not eligible to borrow more books.",
-                        "Borrow Limit Reached",
-                        JOptionPane.WARNING_MESSAGE
-                );
-
-                btnSave.setEnabled(false); // Optional: disable the borrow button
-//            } else {
-//                btnSave.setEnabled(true); // in case you want to re-enable later    
-            }
+            unreturnedRowCount = tblUnreturnedBooks.getRowCount();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -780,8 +793,8 @@ public class Issue extends javax.swing.JFrame {
     }
 
     private boolean validateBookStudentID() {
-        if (selectedBookID != null && !selectedStudentID.isEmpty()
-                && selectedStudentID != null && !selectedStudentID.isEmpty()) {
+        if (selectedBookID != null && !this.selectedBookID.isEmpty()
+                && selectedStudentID != null && !this.selectedStudentID.isEmpty()) {
             return true;
         }
         return false;

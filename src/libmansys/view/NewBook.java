@@ -20,6 +20,10 @@ public class NewBook extends javax.swing.JFrame {
     private String currentUsername;
     private int selectedRow = 0;
 
+    public NewBook() {
+        
+    }
+    
     public NewBook(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null); // center window
@@ -92,7 +96,7 @@ public class NewBook extends javax.swing.JFrame {
         txtPrice = new javax.swing.JTextField();
         cboCategory = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
-        txaTitle = new javax.swing.JTextArea();
+        txtTitle = new javax.swing.JTextArea();
         btnHome = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         scpBook = new javax.swing.JScrollPane();
@@ -168,11 +172,11 @@ public class NewBook extends javax.swing.JFrame {
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
-        txaTitle.setColumns(20);
-        txaTitle.setLineWrap(true);
-        txaTitle.setRows(5);
-        txaTitle.setWrapStyleWord(true);
-        jScrollPane1.setViewportView(txaTitle);
+        txtTitle.setColumns(20);
+        txtTitle.setLineWrap(true);
+        txtTitle.setRows(5);
+        txtTitle.setWrapStyleWord(true);
+        jScrollPane1.setViewportView(txtTitle);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -316,6 +320,11 @@ public class NewBook extends javax.swing.JFrame {
 
         btnSearch.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btnSearch.setText("Clear");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -451,7 +460,7 @@ public class NewBook extends javax.swing.JFrame {
                 }
 
                 int bookId = Integer.parseInt(txtBookID.getText());
-                String title = txaTitle.getText();
+                String title = txtTitle.getText();
                 boolean isDeleted = dao.deleteBook(bookId);
 
                 if (isDeleted) {
@@ -520,6 +529,10 @@ public class NewBook extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        clearBookFields();        
+    }//GEN-LAST:event_btnSearchActionPerformed
+
     //Private Helper methods
     private void selectBookRow() {
         selectedRow = tblBook.getSelectedRow();
@@ -530,7 +543,7 @@ public class NewBook extends javax.swing.JFrame {
             btnAdd.setEnabled(false);
 
             txtBookID.setText(tblBook.getValueAt(selectedRow, 0).toString());
-            txaTitle.setText(tblBook.getValueAt(selectedRow, 1).toString());
+            txtTitle.setText(tblBook.getValueAt(selectedRow, 1).toString());
             txtAuthor.setText(tblBook.getValueAt(selectedRow, 2).toString());
             txtPublisher.setText(tblBook.getValueAt(selectedRow, 3).toString());
             cboCategory.setSelectedItem(tblBook.getValueAt(selectedRow, 4).toString());
@@ -546,7 +559,7 @@ public class NewBook extends javax.swing.JFrame {
 
     private void clearBookFields() {
         txtBookID.setText("");
-        txaTitle.setText("");
+        txtTitle.setText("");
         txtAuthor.setText("");
         txtPublisher.setText("");
         cboCategory.setSelectedIndex(0);
@@ -563,7 +576,7 @@ public class NewBook extends javax.swing.JFrame {
             book.setBookId(Integer.parseInt(txtBookID.getText()));
         }
 
-        book.setTitle(txaTitle.getText());
+        book.setTitle(txtTitle.getText());
         book.setAuthor(txtAuthor.getText());
         book.setPublisher(txtPublisher.getText());
         book.setCategory(cboCategory.getSelectedItem().toString());
@@ -592,9 +605,9 @@ public class NewBook extends javax.swing.JFrame {
 
     private boolean validateBookFields() {
         // Text fields
-        if (txaTitle.getText().trim().isEmpty()) {
+        if (txtTitle.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Title is required.");
-            txaTitle.requestFocus();
+            txtTitle.requestFocus();
             return false;
         }
         if (txtAuthor.getText().trim().isEmpty()) {
@@ -664,7 +677,7 @@ public class NewBook extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                //new NewBook().setVisible(true);
+                new NewBook().setVisible(true);
             }
         });
     }
@@ -689,13 +702,13 @@ public class NewBook extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane scpBook;
     private javax.swing.JTable tblBook;
-    private javax.swing.JTextArea txaTitle;
     private javax.swing.JTextField txtAuthor;
     private javax.swing.JTextField txtBookID;
     private javax.swing.JTextField txtPrice;
     private javax.swing.JTextField txtPublisher;
     private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextArea txtTitle;
     private javax.swing.JTextField txtYear;
     // End of variables declaration//GEN-END:variables
 }
