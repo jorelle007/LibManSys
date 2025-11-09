@@ -26,7 +26,9 @@ public class UserDAO {
                 try (ResultSet rs = stmt.getResultSet()) {
                     if (rs.next()) {
                         // ✅ user found
+
                         User user = new User();
+
                         user.setFull_name(rs.getString("full_name"));
                         user.setUsername(username);
                         return user;
@@ -72,7 +74,7 @@ public class UserDAO {
 
     // SEARCH USERNAME
     public User searchUser(String username) throws SQLException {
-        String sql = "SELECT full_name, security_question FROM tUsers WHERE username = ?";
+        String sql = "SELECT full_name, security_question FROM tusers WHERE username = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -88,7 +90,7 @@ public class UserDAO {
     }
 
     public boolean verifySecurityAnswer(String username, String security_answer) throws SQLException {
-        String sql = "SELECT * FROM tUsers WHERE username = ? AND security_answer = ?";
+        String sql = "SELECT * FROM tusers WHERE username = ? AND security_answer = ?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, username);
         stmt.setString(2, security_answer);

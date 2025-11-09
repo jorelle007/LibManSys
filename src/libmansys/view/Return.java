@@ -1,13 +1,17 @@
 package libmansys.view;
         
+import java.sql.Connection;
 import libmansys.utils.Helper;
 
 public class Return extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Return
-     */
+    private Connection conn;
+    
     public Return() {
+        
+    }
+    
+    public Return(Connection conn, String bookID) {
         initComponents();
         setLocationRelativeTo(null);
     }

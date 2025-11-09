@@ -74,7 +74,7 @@ public class BookDAO {
 
     public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM tBook";
+        String sql = "SELECT * FROM tbook";
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -97,10 +97,11 @@ public class BookDAO {
         }
         return books;
     }
+    
 
     //Add Book
     public boolean addBook(Book book) throws SQLException {
-        String sql = "INSERT INTO tBook (title, author, publisher, category, year_published, quantity, price) "
+        String sql = "INSERT INTO tbook (title, author, publisher, category, year_published, quantity, price) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -136,7 +137,7 @@ public class BookDAO {
             }
         }
 
-        String sql = "UPDATE tBook SET title = ?, author = ?, publisher = ?, "
+        String sql = "UPDATE tbook SET title = ?, author = ?, publisher = ?, "
                 + "category = ?, year_published = ?, quantity = ?, price = ? WHERE book_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, book.getTitle());
@@ -154,7 +155,7 @@ public class BookDAO {
 
     //Delete Book
     public boolean deleteBook(int bookId) throws SQLException {
-        String sql = "DELETE FROM tBook WHERE book_id = ?";
+        String sql = "DELETE FROM tbook WHERE book_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, bookId);
             int rowsAffected = stmt.executeUpdate();
@@ -164,7 +165,7 @@ public class BookDAO {
 
     //helper method to get a book record by Id
     public Book getBookById(int bookId) throws SQLException {
-        String sql = "SELECT * FROM tBook WHERE book_id = ?";
+        String sql = "SELECT * FROM tbook WHERE book_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, bookId);
             ResultSet rs = stmt.executeQuery();

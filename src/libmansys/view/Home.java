@@ -326,7 +326,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSummaryActionPerformed
 
     private void btnIssueBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIssueBookActionPerformed
-        new Issue().setVisible(true);
+        new Issue(conn, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnIssueBookActionPerformed
 
@@ -336,7 +336,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_btnReturnBookActionPerformed
 
     private void btnAboutUsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAboutUsActionPerformed
-        new AboutUs().setVisible(true);
+        new AboutUs(conn).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnAboutUsActionPerformed
 
