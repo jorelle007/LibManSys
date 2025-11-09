@@ -29,8 +29,7 @@ public class SummaryReturnDAO {
                 + "r.return_date, "
                 + "r.condition_on_return, "
                 + "r.days_overdue, "
-                + "r.penalty, "
-                + "r.user_id "
+                + "r.penalty "
                 + "FROM treturn r "
                 + "JOIN tbtr b ON r.btr_id = b.btr_id "
                 + "JOIN tstudent s ON b.student_id = s.student_id";

@@ -28,8 +28,7 @@ public class SummaryBorrowDAO {
                 + "b.student_id, "
                 + "b.borrow_date, "
                 + "b.due_date, "
-                + "b.status, "
-                + "b.user_id "
+                + "b.status "
                 + "FROM tbtr b "
                 + "JOIN tstudent s ON b.student_id = s.student_id";
 
