@@ -607,7 +607,7 @@ public class Issue extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSearchStudentActionPerformed
 
     private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
-        new Return(conn, selectedUnreturnedBookID).setVisible(true);
+        new Return(conn, selectedUnreturnedBookID, currentUserName).setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_btnReturnActionPerformed
 
