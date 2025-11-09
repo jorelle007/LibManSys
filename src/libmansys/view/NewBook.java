@@ -21,7 +21,6 @@ public class NewBook extends javax.swing.JFrame {
     private int selectedRow = 0;
 
     public NewBook() {
-        
     }
     
     public NewBook(Connection conn, String userName) {
