@@ -199,8 +199,8 @@ public class Login extends javax.swing.JFrame {
             User user = dao.login(username, password);
             if (user != null) {
                 JOptionPane.showMessageDialog(this, "Welcome, " + user.getFull_name() + "!");
-                dispose(); // close login form                
                 new Home(conn, user.getUsername(), user.getFull_name()).setVisible(true); // open Main program
+                dispose(); // close login form                                
 
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!");

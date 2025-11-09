@@ -27,7 +27,8 @@ public class UserDAO {
                     if (rs.next()) {
                         // ✅ user found
                         User user = new User();                 
-                        user.setFull_name(rs.getString("full_name"));                  
+                        user.setFull_name(rs.getString("full_name"));
+                        user.setUsername(username);
                         return user;
                     }
                 }

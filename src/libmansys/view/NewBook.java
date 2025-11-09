@@ -24,10 +24,25 @@ public class NewBook extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null); // center window
 
-        // Right-align money column (e.g., column index 7)
+        if (conn == null) {
+            JOptionPane.showMessageDialog(this, "Database connection is null!");
+            return; // 
+        }
+        this.conn = conn;
+        this.currentUsername = userName;
+        this.dao = new BookDAO(conn);
+
+        // Right-align Penalty money column (e.g., column index 7)
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
         tblBook.getColumnModel().getColumn(7).setCellRenderer(rightRenderer);
+
+        // Center
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        tblBook.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        tblBook.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        tblBook.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
 
         btnUpdate.setEnabled(false);
         btnDelete.setEnabled(false);
@@ -36,14 +51,6 @@ public class NewBook extends javax.swing.JFrame {
         PromptSupport.setPrompt("Search by Title, Author, or Category...", txtSearch);
         PromptSupport.setForeground(Color.GRAY, txtSearch);
         PromptSupport.setFocusBehavior(PromptSupport.FocusBehavior.SHOW_PROMPT, txtSearch);
-
-        if (conn == null) {
-            JOptionPane.showMessageDialog(this, "Database connection is null!");
-            return; // 
-        }
-        this.conn = conn;
-        this.currentUsername = userName;
-        this.dao = new BookDAO(conn);
 
         //Load table data
         loadBookTable();
@@ -372,19 +379,11 @@ public class NewBook extends javax.swing.JFrame {
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         try {
-            Book book = getBookFromFields();
-//            int bookId = Integer.parseInt(txtBookID.getText());
-//            String title = txaTitle.getText();
-//            String author = txtAuthor.getText();
-//            String publisher = txtPublisher.getText();
-//            String category = cboCategory.getSelectedItem().toString();
-//            int year = Integer.parseInt(txtYear.getText());
-//            int quantity = Integer.parseInt(txtQuantity.getText());
-//            double price = Double.parseDouble(txtPrice.getText());
 
-            // Create a Book object from these form values            
-            //Book book = new Book(bookId, title, author, publisher, category, year, quantity, price);
-            // Then pass it to your DAO
+            // Create a book object from form values  
+            Book book = getBookFromFields();
+
+            // Then pass it to Book DAO
             boolean isUpdated = dao.updateBook(book);
 
             if (isUpdated) {

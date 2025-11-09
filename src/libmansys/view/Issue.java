@@ -1,17 +1,74 @@
 package libmansys.view;
 
-import java.sql.*;
-import javax.swing.JOptionPane;
+import java.awt.Color;
+import java.util.Calendar;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import libmansys.utils.Helper;
+import org.jdesktop.swingx.prompt.PromptSupport;
+import libmansys.dao.IssueDAO;
+import libmansys.model.Book;
 
 public class Issue extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Issue
-     */
+    private Connection conn;
+    private IssueDAO issueDao;
+    private int selectedRow;
+    private String selectedStudentID;
+    private String selectedBookID;
+    private String selectedUnreturnedBookID;
+    private java.sql.Date borrowDate;
+    private java.sql.Date dueDate;
+    private String bookStatus = "Borrowed";
+    private String currentUserName;
+    private boolean isComplete;
+
     public Issue() {
+
+    }
+
+    public Issue(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null);
+
+        this.conn = conn;
+        this.issueDao = new IssueDAO(conn);
+        this.currentUserName = userName;
+
+        txtBookID.setEnabled(false);
+        txtTitle.setEnabled(false);
+        dtBorrowDate.setEnabled(false);
+        btnSave.setEnabled(false);
+        btnReturn.setEnabled(false);
+        btnClear.setEnabled(false);
+        txtStudentID.setEnabled(false);
+        txtStudentName.setEnabled(false);
+        txtCourse.setEnabled(false);
+        txtEmail.setEnabled(false);
+
+        PromptSupport.setPrompt("Search by Title, Author, or Category...", txtSearch);
+        PromptSupport.setForeground(Color.GRAY, txtSearch);
+        PromptSupport.setFocusBehavior(PromptSupport.FocusBehavior.SHOW_PROMPT, txtSearch);
+
+        PromptSupport.setPrompt("Search by Student ID or Student Name", txtSearchKeyword);
+        PromptSupport.setForeground(Color.GRAY, txtSearchKeyword);
+        PromptSupport.setFocusBehavior(PromptSupport.FocusBehavior.SHOW_PROMPT, txtSearchKeyword);
+
+        // call centerTableColumns to center table cells
+        centerTableColumns(tblAvailableBooks, 0, 5, 6);
+        centerTableColumns(tblUnreturnedBooks, 0, 2);
+
+        initAvailableBooksTable();
+        DefaultTableModel unreturnedBooksTbl = (DefaultTableModel) tblUnreturnedBooks.getModel();
+        unreturnedBooksTbl.setRowCount(0);
+
     }
 
     /**
@@ -24,20 +81,35 @@ public class Issue extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
+        txtSearch = new javax.swing.JTextField();
+        btnSave = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblAvailableBooks = new javax.swing.JTable();
+        jPanel2 = new javax.swing.JPanel();
+        btnSearchStudent = new javax.swing.JButton();
+        txtSearchKeyword = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tblUnreturnedBooks = new javax.swing.JTable();
+        txtStudentID = new javax.swing.JTextField();
+        txtStudentName = new javax.swing.JTextField();
+        txtCourse = new javax.swing.JTextField();
+        txtEmail = new javax.swing.JTextField();
+        btnReturn = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        txtBookID = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        dtDueDate = new com.toedter.calendar.JDateChooser();
+        jLabel6 = new javax.swing.JLabel();
+        dtBorrowDate = new com.toedter.calendar.JDateChooser();
+        jLabel9 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtTitle = new javax.swing.JTextArea();
         jLabel8 = new javax.swing.JLabel();
         btnHome = new javax.swing.JButton();
 
@@ -45,108 +117,354 @@ public class Issue extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 0, 255)), "Borrow Book", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 24), new java.awt.Color(0, 51, 153))); // NOI18N
 
-        jButton2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/save.png"))); // NOI18N
-        jButton2.setText("Create");
-
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        txtSearch.setToolTipText("");
+        txtSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                txtSearchActionPerformed(evt);
             }
         });
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Available", "Borrowed", "Lost" }));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/save.png"))); // NOI18N
+        btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
 
-        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel7.setText("Status");
+        tblAvailableBooks.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+            },
+            new String [] {
+                "Book Id", "Title", "Author", "Publisher", "Category", "Year", "Qty"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblAvailableBooks.setRowHeight(28);
+        tblAvailableBooks.getTableHeader().setReorderingAllowed(false);
+        tblAvailableBooks.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAvailableBooksMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblAvailableBooks);
+        if (tblAvailableBooks.getColumnModel().getColumnCount() > 0) {
+            tblAvailableBooks.getColumnModel().getColumn(0).setMinWidth(50);
+            tblAvailableBooks.getColumnModel().getColumn(0).setMaxWidth(50);
+            tblAvailableBooks.getColumnModel().getColumn(1).setResizable(false);
+            tblAvailableBooks.getColumnModel().getColumn(2).setResizable(false);
+            tblAvailableBooks.getColumnModel().getColumn(3).setResizable(false);
+            tblAvailableBooks.getColumnModel().getColumn(4).setMinWidth(100);
+            tblAvailableBooks.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tblAvailableBooks.getColumnModel().getColumn(4).setMaxWidth(150);
+            tblAvailableBooks.getColumnModel().getColumn(5).setMinWidth(40);
+            tblAvailableBooks.getColumnModel().getColumn(5).setMaxWidth(40);
+            tblAvailableBooks.getColumnModel().getColumn(6).setMinWidth(35);
+            tblAvailableBooks.getColumnModel().getColumn(6).setMaxWidth(35);
+        }
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        btnSearchStudent.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnSearchStudent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/search.png"))); // NOI18N
+        btnSearchStudent.setText("Search");
+        btnSearchStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchStudentActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setText("Name        :");
+
+        jLabel10.setText("Course  :");
+
+        jLabel11.setText("Student ID   :");
+
+        jLabel13.setText("Email     :");
+
+        jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        tblUnreturnedBooks.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Book ID", "Title", "Borrow Date"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblUnreturnedBooks.setAutoscrolls(false);
+        tblUnreturnedBooks.setFillsViewportHeight(true);
+        tblUnreturnedBooks.setPreferredSize(new java.awt.Dimension(200, 70));
+        tblUnreturnedBooks.setRowHeight(25);
+        tblUnreturnedBooks.getTableHeader().setReorderingAllowed(false);
+        tblUnreturnedBooks.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblUnreturnedBooksMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(tblUnreturnedBooks);
+        if (tblUnreturnedBooks.getColumnModel().getColumnCount() > 0) {
+            tblUnreturnedBooks.getColumnModel().getColumn(0).setMinWidth(50);
+            tblUnreturnedBooks.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblUnreturnedBooks.getColumnModel().getColumn(0).setMaxWidth(50);
+            tblUnreturnedBooks.getColumnModel().getColumn(2).setMinWidth(100);
+            tblUnreturnedBooks.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tblUnreturnedBooks.getColumnModel().getColumn(2).setMaxWidth(100);
+        }
+
+        txtStudentID.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtStudentID.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        txtStudentName.setFont(new java.awt.Font("sansserif", 0, 11)); // NOI18N
+        txtStudentName.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtStudentName.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        txtCourse.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtCourse.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        txtEmail.setFont(new java.awt.Font("sansserif", 0, 10)); // NOI18N
+        txtEmail.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtEmail.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        btnReturn.setText("Return Book");
+        btnReturn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReturnActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(2, 6, Short.MAX_VALUE)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                        .addGap(6, 6, 6)
+                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel11))
+                                .addGap(10, 10, 10)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(txtStudentName, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
+                                    .addComponent(txtStudentID))
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addGap(16, 16, 16)
+                                        .addComponent(jLabel13))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel10))))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(txtSearchKeyword)))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnSearchStudent, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtCourse, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                            .addComponent(txtEmail)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnReturn)))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtSearchKeyword, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSearchStudent))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(jLabel10)
+                    .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel13)
+                    .addComponent(txtStudentName, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnReturn)
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+
+        btnClear.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        txtBookID.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtBookID.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        txtBookID.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtBookID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBookIDActionPerformed(evt);
+            }
+        });
+
         jLabel5.setText("Borrow Date");
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel3.setText("User ID");
+        jLabel2.setText("Book ID");
 
-        jButton1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/search.png"))); // NOI18N
-        jButton1.setText("Search");
-
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel6.setText("Due Date");
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel1.setText("BTR ID");
+        dtBorrowDate.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel4.setText("Student ID");
+        jLabel9.setText("Book Title");
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setText("Book ID");
+        txtTitle.setEditable(false);
+        txtTitle.setColumns(20);
+        txtTitle.setLineWrap(true);
+        txtTitle.setRows(5);
+        txtTitle.setWrapStyleWord(true);
+        txtTitle.setAutoscrolls(false);
+        txtTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtTitle.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtTitle.setRequestFocusEnabled(false);
+        jScrollPane2.setViewportView(txtTitle);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addGap(32, 32, 32)
+                        .addComponent(txtBookID, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 18, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addGap(16, 16, 16)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addGap(32, 32, 32))
+                                    .addGroup(jPanel3Layout.createSequentialGroup()
+                                        .addComponent(jLabel6)
+                                        .addGap(34, 34, 34)))
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(dtDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(dtBorrowDate, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(16, 16, 16))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtBookID, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(jLabel9)))
+                .addGap(26, 26, 26)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(dtBorrowDate, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(dtDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(123, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addGap(38, 38, 38)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField1)
-                            .addComponent(jTextField2)
-                            .addComponent(jTextField3)
-                            .addComponent(jTextField4)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton1))
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(29, 29, 29)
-                        .addComponent(jButton2)))
-                .addGap(81, 81, 81))
+                        .addGap(325, 325, 325)
+                        .addComponent(btnSave)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addGap(28, 28, 28)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32)
-                .addComponent(jLabel5)
-                .addGap(21, 21, 21)
-                .addComponent(jLabel6)
-                .addGap(26, 26, 26)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
-                .addComponent(jButton2)
+                    .addComponent(btnSave)
+                    .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -165,47 +483,309 @@ public class Issue extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel8)
+                .addGap(549, 549, 549)
+                .addComponent(btnHome)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(87, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(65, 65, 65)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnHome)))
-                .addGap(117, 117, 117))
+                .addContainerGap(11, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(65, 65, 65)
+                        .addGap(32, 32, 32)
                         .addComponent(btnHome))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(137, Short.MAX_VALUE))
+                .addGap(5, 5, 5))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
-
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        //Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn);
     }//GEN-LAST:event_btnHomeActionPerformed
+
+    private void txtBookIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBookIDActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBookIDActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearBookDetails();
+        clearStudentDetails();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        isComplete = validateBookStudentID();
+
+        if (isComplete == true) {
+
+            int studentID = Integer.parseInt(selectedStudentID);
+            int bookID = Integer.parseInt(selectedBookID);
+
+            boolean isBTRSaved = issueDao.saveBTR(studentID, bookID,
+                    borrowDate, dueDate, bookStatus, currentUserName);
+
+            if (isBTRSaved) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Book borrowed successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Unable to complete the transaction.",
+                        "Borrow Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+
+            loadUnreturnedBooks();
+        }
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void tblAvailableBooksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAvailableBooksMouseClicked
+        selectBookRow();
+        this.selectedBookID = txtBookID.getText();
+        btnClear.setEnabled(true);
+        isComplete = validateBookStudentID();
+
+        if (isComplete == true) {
+            btnSave.setEnabled(true);
+        }
+
+        // If user clicked on an empty space (no valid row)
+        int rowAtPoint = tblAvailableBooks.rowAtPoint(evt.getPoint());
+        if (rowAtPoint == -1) {
+            tblAvailableBooks.clearSelection();
+            clearBookDetails();
+            btnSave.setEnabled(false);
+            btnClear.setEnabled(false);
+            return;
+        }
+    }//GEN-LAST:event_tblAvailableBooksMouseClicked
+
+    private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSearchActionPerformed
+
+    private void btnSearchStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchStudentActionPerformed
+        String keyword = txtSearchKeyword.getText().trim();
+        SearchStudent searchStudent = new SearchStudent(this, conn, keyword);
+        searchStudent.setVisible(true);
+
+    }//GEN-LAST:event_btnSearchStudentActionPerformed
+
+    private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
+        new Return(conn, selectedUnreturnedBookID).setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_btnReturnActionPerformed
+
+    private void tblUnreturnedBooksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblUnreturnedBooksMouseClicked
+        selectUnreturnedBookRow();
+        if (isComplete == true) {
+            btnSave.setEnabled(true);
+        }
+    }//GEN-LAST:event_tblUnreturnedBooksMouseClicked
+
+    private void initAvailableBooksTable() {
+        // table starts empty
+        DefaultTableModel model = (DefaultTableModel) tblAvailableBooks.getModel();
+        model.setRowCount(0);
+
+        // attach filter
+        Helper.addTableFilter(tblAvailableBooks, txtSearch, 0, 1, 2, 4);
+
+        // listen for typing to load data
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            private void filterTable() {
+                String text = txtSearch.getText().trim();
+                DefaultTableModel model = (DefaultTableModel) tblAvailableBooks.getModel();
+
+                if (text.isEmpty()) {
+                    // Clear table instead of loading all data
+                    model.setRowCount(0);
+                    tblAvailableBooks.clearSelection(); // 🔹 Deselect any selected row  
+                    clearBookDetails();
+                } else {
+                    if (model.getRowCount() == 0) {
+                        // Only load the data once when typing
+                        loadAvailableBooksTable();
+                    }
+                }
+                Helper.autoResizeColumns(tblAvailableBooks);
+            }
+        });
+    }
+
+    private void loadAvailableBooksTable() {
+        try {
+            List<Book> books = issueDao.getAllAvailableBooks();
+
+            DefaultTableModel availableBooksTbl = (DefaultTableModel) tblAvailableBooks.getModel();
+            availableBooksTbl.setRowCount(0);
+
+            for (Book b : books) {
+                Object[] row = {b.getBookId(), b.getTitle(), b.getAuthor(), b.getPublisher(),
+                    b.getCategory(), b.getYear(), b.getQuantity(), b.getBookPrice()
+                };
+                availableBooksTbl.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading books: " + e.getMessage());
+        }
+    }
+
+    private void selectBookRow() {
+        selectedRow = tblAvailableBooks.getSelectedRow();
+
+        if (selectedRow != -1) {
+
+            // Set borrow date to today
+            java.util.Date today = new java.util.Date();
+            dtBorrowDate.setDate(today);
+            this.borrowDate = new java.sql.Date(today.getTime());  // if you need java.sql.Date later
+
+            // Calculate due date (+7 days)
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(today);
+            cal.add(Calendar.DAY_OF_MONTH, 7);
+            java.util.Date due = cal.getTime();
+            dtDueDate.setDate(due);
+            this.dueDate = new java.sql.Date(due.getTime());
+
+            // Set book info
+            txtBookID.setText(tblAvailableBooks.getValueAt(selectedRow, 0).toString());
+            txtTitle.setText(tblAvailableBooks.getValueAt(selectedRow, 1).toString());
+            //this.selectedBookTitle = tblAvailableBooks.getValueAt(selectedRow, 1).toString();
+            btnClear.setEnabled(true);
+
+        } else {
+            clearBookDetails(); // clear book fields
+            btnClear.setEnabled(false);
+        }
+    }
+
+    private void selectUnreturnedBookRow() {
+        selectedRow = tblUnreturnedBooks.getSelectedRow();
+
+        if (selectedRow != -1) {
+            this.selectedUnreturnedBookID = tblUnreturnedBooks.getValueAt(selectedRow, 0).toString();
+            btnReturn.setEnabled(true);
+        } else {
+            btnClear.setEnabled(false);
+            btnReturn.setEnabled(false);
+        }
+    }
+
+    private void clearBookDetails() {
+        txtSearch.setText("");
+        txtBookID.setText("");
+        txtTitle.setText("");
+        dtBorrowDate.setDate(null);
+        dtDueDate.setDate(null);
+        btnClear.setEnabled(false);
+    }
+
+    private void clearStudentDetails() {
+        DefaultTableModel model = (DefaultTableModel) tblAvailableBooks.getModel();
+        model.setRowCount(0);
+
+        DefaultTableModel unreturnedBooksTbl = (DefaultTableModel) tblUnreturnedBooks.getModel();
+        unreturnedBooksTbl.setRowCount(0);
+
+        txtStudentID.setText("");
+        txtStudentName.setText("");
+        txtCourse.setText("");
+        txtEmail.setText("");
+        btnClear.setEnabled(false);
+    }
+
+    public void selectedStudent(String studentID, String firstName, String lastName, String course, String email) {
+        this.selectedStudentID = studentID;
+        txtStudentID.setText(studentID);
+        txtStudentName.setText(firstName + " " + lastName);
+        txtCourse.setText(course);
+        txtEmail.setText(email);
+        txtSearchKeyword.setText("");
+        btnClear.setEnabled(true);
+
+        // Load unreturned books for this student
+        loadUnreturnedBooks();
+    }
+
+    private void loadUnreturnedBooks() {
+        try {
+            List<Object[]> unreturnedBooks = issueDao.getUnreturnedBooksByStudent(selectedStudentID);
+
+            DefaultTableModel unreturnedBooksTbl = (DefaultTableModel) tblUnreturnedBooks.getModel();
+            unreturnedBooksTbl.setRowCount(0);
+
+            for (Object[] row : unreturnedBooks) {
+                unreturnedBooksTbl.addRow(row);
+            }
+
+            // After populating, check if the student already has 3 unreturned books
+            if (unreturnedBooksTbl.getRowCount() == 3) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "This student is not eligible to borrow more books.",
+                        "Borrow Limit Reached",
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                btnSave.setEnabled(false); // Optional: disable the borrow button
+//            } else {
+//                btnSave.setEnabled(true); // in case you want to re-enable later    
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading students.");
+        }
+
+    }
+
+    private void centerTableColumns(JTable table, int... columns) {
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int col : columns) {
+            table.getColumnModel().getColumn(col).setCellRenderer(renderer);
+        }
+    }
+
+    private boolean validateBookStudentID() {
+        if (selectedBookID != null && !selectedStudentID.isEmpty()
+                && selectedStudentID != null && !selectedStudentID.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * @param args the command line arguments
@@ -237,28 +817,43 @@ public class Issue extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Issue().setVisible(true);
+                //new Issue().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
     private javax.swing.JButton btnHome;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnReturn;
+    private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSearchStudent;
+    private com.toedter.calendar.JDateChooser dtBorrowDate;
+    private com.toedter.calendar.JDateChooser dtDueDate;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable tblAvailableBooks;
+    private javax.swing.JTable tblUnreturnedBooks;
+    private javax.swing.JTextField txtBookID;
+    private javax.swing.JTextField txtCourse;
+    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextField txtSearchKeyword;
+    private javax.swing.JTextField txtStudentID;
+    private javax.swing.JTextField txtStudentName;
+    private javax.swing.JTextArea txtTitle;
     // End of variables declaration//GEN-END:variables
 }
