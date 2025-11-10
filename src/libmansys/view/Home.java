@@ -13,14 +13,14 @@ public class Home extends javax.swing.JFrame {
     private String full_name;
 
     public Home() {
-        this(null, null, null); // calls the main constructor
+        this(null, null, null); 
     }
 
     public Home(Connection conn) {
-        this(conn, null, null); // calls the main constructor
+        this(conn, null, null); 
     }
 
-    public Home(Connection conn, String userName, String full_name) { //make it private after enabling the Login form
+    public Home(Connection conn, String userName, String full_name) { 
         initComponents();
         pack();
         setLocationRelativeTo(null);

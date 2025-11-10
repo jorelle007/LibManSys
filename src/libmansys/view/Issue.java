@@ -32,7 +32,7 @@ public class Issue extends javax.swing.JFrame {
     private int unreturnedRowCount;
 
     public Issue() {
-
+        this(null, null);
     }
 
     public Issue(Connection conn, String userName) {
@@ -597,7 +597,7 @@ public class Issue extends javax.swing.JFrame {
             SearchStudent searchStudent = new SearchStudent(this, conn, keyword);
             searchStudent.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, 
+            JOptionPane.showMessageDialog(this,
                     "Please enter a student ID, first name, or last name to search.",
                     "Empty Search",
                     JOptionPane.WARNING_MESSAGE);

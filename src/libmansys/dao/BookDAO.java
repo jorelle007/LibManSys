@@ -74,7 +74,7 @@ public class BookDAO {
 
     public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM tbook";
+        String sql = "SELECT * FROM tbook WHERE isDeleted = FALSE";
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -97,7 +97,6 @@ public class BookDAO {
         }
         return books;
     }
-    
 
     //Add Book
     public boolean addBook(Book book) throws SQLException {
@@ -154,13 +153,37 @@ public class BookDAO {
     }
 
     //Delete Book
-    public boolean deleteBook(int bookId) throws SQLException {
-        String sql = "DELETE FROM tbook WHERE book_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, bookId);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+    public boolean deleteBook(int bookID) throws SQLException {
+        String checkQuery = "SELECT COUNT(*) FROM tBTR b " +
+                            "LEFT JOIN tReturn r ON b.btr_id = r.btr_id " +
+                            "WHERE b.book_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
+
+        try (PreparedStatement ps = conn.prepareStatement(checkQuery)) {
+            ps.setInt(1, bookID);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt(1) == 0) {
+                // Safe to soft-delete
+                String deleteQuery = "UPDATE tBook SET isDeleted = TRUE, deletedAt = NOW() WHERE book_id = ?";
+                try (PreparedStatement psDel = conn.prepareStatement(deleteQuery)) {
+                    psDel.setInt(1, bookID);
+                    psDel.executeUpdate();
+                }
+                return true; // deleted successfully
+            } else {
+                return false; // cannot delete, book is borrowed
+            }
         }
+
+        //String sql = "DELETE FROM tbook WHERE book_id = ?";
+//        String sql = "UPDATE tBook SET isDeleted = TRUE, "
+//                + "deletedAt = CURRENT_TIMESTAMP "
+//                + "WHERE book_id = ?";
+//        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+//            stmt.setInt(1, bookID);
+//            int rowsAffected = stmt.executeUpdate();
+//            return rowsAffected > 0;
+//        }
     }
 
     //helper method to get a book record by Id

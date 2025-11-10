@@ -21,9 +21,9 @@ public class NewBook extends javax.swing.JFrame {
     private int selectedRow = 0;
 
     public NewBook() {
-        
+
     }
-    
+
     public NewBook(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null); // center window
@@ -464,13 +464,19 @@ public class NewBook extends javax.swing.JFrame {
                 boolean isDeleted = dao.deleteBook(bookId);
 
                 if (isDeleted) {
-                    JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
+                    JOptionPane.showMessageDialog(this, "Book " + title + "  has been successfully deleted.",
+                            "Success", JOptionPane.INFORMATION_MESSAGE);
+                    //JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
                     loadBookTable();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot delete this book. It is currently borrowed!",
+                            "Warning", JOptionPane.WARNING_MESSAGE);
                 }
 
             } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error deleting book: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
             }
                 
         }
@@ -561,9 +567,11 @@ if (priceInvalid) {
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         clearBookFields();
+
         btnAdd.setEnabled(true);
         btnUpdate.setEnabled(false);
         btnDelete.setEnabled(false);        
+
     }//GEN-LAST:event_btnSearchActionPerformed
 
     //Private Helper methods
@@ -599,6 +607,9 @@ if (priceInvalid) {
         txtYear.setText("");
         txtQuantity.setText("");
         txtPrice.setText("");
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
+        btnAdd.setEnabled(true);
     }
 
     private Book getBookFromFields() {
