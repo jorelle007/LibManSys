@@ -2,11 +2,14 @@ package libmansys.utils;
 
 import java.awt.Component;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.event.*;
 import libmansys.view.*;
+import libmansys.dao.UserDAO;
+import libmansys.model.User;
 
 public class Helper {
 
@@ -18,7 +21,25 @@ public class Helper {
     }
 
     public static void goBackToHome(JFrame currentFrame, Connection conn) {
-        new Home(conn).setVisible(true);
+        goBackToHome(currentFrame, conn, null);
+    }
+    
+    public static void goBackToHome(JFrame currentFrame, Connection conn, String username) {
+        String fullName = null;
+        
+        if (username != null && !username.isEmpty() && conn != null) {
+            try {
+                UserDAO userDAO = new UserDAO(conn);
+                User user = userDAO.searchUser(username);
+                if (user != null) {
+                    fullName = user.getFull_name();
+                }
+            } catch (SQLException ex) {
+                System.err.println("Error fetching user name: " + ex.getMessage());
+            }
+        }
+        
+        new Home(conn, username, fullName).setVisible(true);
         currentFrame.dispose();
     }
 
