@@ -100,7 +100,7 @@ public class IssueDAO {
                         //rs.getString("btr_id"),
                         rs.getString("book_id"),
                         rs.getString("title"),
-                        rs.getDate("borrow_date")
+                        rs.getDate("due_date")
                     });
                 }
             }
@@ -158,5 +158,23 @@ public class IssueDAO {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean hasOverdueBooks(int studentID) throws SQLException {
+        String query = "SELECT COUNT(*) AS overdueCount "
+                + "FROM tBTR b "
+                + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
+                + "WHERE b.student_id = ? "
+                + "AND r.return_date IS NULL "
+                + "AND b.due_date < CURDATE()";
+
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, studentID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("overdueCount") > 0;
+            }
+        }
+        return false;
     }
 }

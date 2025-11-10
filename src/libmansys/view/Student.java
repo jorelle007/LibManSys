@@ -18,8 +18,12 @@ public class Student extends javax.swing.JFrame {
     private Connection conn;
     private String currentUsername;
     
-    private Student() {
-        
+    public Student() {
+        this(null, null);
+    }
+    
+    public Student(Connection conn) {
+        this(conn, null);
     }
 
     public Student(Connection conn, String currentUsername) {
