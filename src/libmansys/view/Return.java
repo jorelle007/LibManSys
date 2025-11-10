@@ -8,7 +8,7 @@ public class Return extends javax.swing.JFrame {
     private Connection conn;
     
     public Return() {
-        
+        this(null, null);
     }
     
     public Return(Connection conn, String bookID) {
