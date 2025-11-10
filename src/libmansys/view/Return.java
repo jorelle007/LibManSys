@@ -137,39 +137,40 @@ public class Return extends javax.swing.JFrame {
 
     private void loadSelectedBorrowedBook(String bookID) {
         try {
-            String sql = "SELECT t.btr_id, t.book_id, b.title AS book_title, t.borrow_date, t.due_date, t.status, "
-                    + "s.student_id, CONCAT(s.first_name, ' ', s.last_name) AS full_name, s.course, s.email_address "
-                    + "FROM tbtr t "
-                    + "JOIN tstudent s ON t.student_id = s.student_id "
-                    + "JOIN tbook b ON t.book_id = b.book_id "
-                    + "WHERE t.book_id = ? AND t.status = 'Borrowed'";
+            ResultSet rs = returnDAO.getBorrowedBook(bookID);
 
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, bookID);
-
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                // Fill the student info
-                txtStudentID.setText(rs.getString("student_id"));
-                txtName.setText(rs.getString("full_name"));
-                txtCourse.setText(rs.getString("course"));
-                txtEmail.setText(rs.getString("email_address"));
-
-                // Add that one book to the table
-                DefaultTableModel model = (DefaultTableModel) btrTable.getModel();
-                model.setRowCount(0);
-
-                Object[] row = {
-                    rs.getString("btr_id"),
-                    rs.getString("book_id"),
-                    rs.getString("book_title"),
-                    rs.getString("borrow_date"),
-                    rs.getString("due_date"),
-                    rs.getString("status")
-                };
-                model.addRow(row);
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(this, "No borrowed record found for this Book ID.");
+                return;
             }
+
+            // Fill student info
+            txtStudentID.setText(rs.getString("student_id"));
+            txtName.setText(rs.getString("full_name"));
+            txtCourse.setText(rs.getString("course"));
+            txtEmail.setText(rs.getString("email_address"));
+
+            // Fill the table with the selected borrowed book
+            DefaultTableModel model = (DefaultTableModel) btrTable.getModel();
+            model.setRowCount(0);
+
+            model.addRow(new Object[]{
+                rs.getString("btr_id"),
+                rs.getString("book_id"),
+                rs.getString("book_title"),
+                rs.getString("borrow_date"),
+                rs.getString("due_date"),
+                rs.getString("status")
+            });
+
+            // Select the first row in the table
+            if (btrTable.getRowCount() > 0) {
+                btrTable.setRowSelectionInterval(0, 0);
+            }
+
+            //enable the Return button
+            btnReturn.setEnabled(true);
+
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error loading borrowed book details.");

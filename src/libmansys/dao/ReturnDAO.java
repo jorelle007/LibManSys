@@ -59,6 +59,22 @@ public class ReturnDAO {
         return borrows;
     }
 
+    public ResultSet getBorrowedBook(String bookId) throws SQLException {
+        String sql
+                = "SELECT t.btr_id, t.book_id, b.title AS book_title, t.borrow_date, "
+                + "t.due_date, t.status, s.student_id, "
+                + "CONCAT(s.first_name, ' ', s.last_name) AS full_name, "
+                + "s.course, s.email_address "
+                + "FROM tbtr t "
+                + "JOIN tstudent s ON t.student_id = s.student_id "
+                + "JOIN tbook b ON t.book_id = b.book_id "
+                + "WHERE t.book_id = ? AND t.status = 'Borrowed'";
+
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, bookId);
+        return pst.executeQuery();
+    }
+
     public Date getDueDate(int btrId) {
         Date dueDate = null;
         String sql = "SELECT due_date FROM tbtr WHERE btr_id = ?";
@@ -121,7 +137,7 @@ public class ReturnDAO {
                 pst.setString(3, condition);
                 pst.setInt(4, overdue);
                 pst.setDouble(5, penalty);
-                pst.setString (6, username);
+                pst.setString(6, username);
                 pst.executeUpdate();
             }
 
