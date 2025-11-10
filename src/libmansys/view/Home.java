@@ -331,7 +331,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_btnIssueBookActionPerformed
 
     private void btnReturnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnBookActionPerformed
-        new Return().setVisible(true);
+        new Return(conn, null, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnReturnBookActionPerformed
 
