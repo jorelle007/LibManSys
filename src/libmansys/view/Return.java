@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -70,6 +71,9 @@ public class Return extends javax.swing.JFrame {
         //from issue book
         if (selectedBookID != null && !selectedBookID.isEmpty()) {
             loadSelectedBorrowedBook(selectedBookID);
+            if (btrTable.getRowCount() == 1) {
+                btrTable.setRowSelectionInterval(0, 0); // select first and only row 
+            }
         }
 
         SwingUtilities.invokeLater(() -> {
@@ -105,7 +109,7 @@ public class Return extends javax.swing.JFrame {
         txtName.setText("");
         txtCourse.setText("");
         txtEmail.setText("");
-        returnDate.setDate(null);
+        returnDate.setDate(new java.util.Date());
         btnReturn.setEnabled(false);
         cboCondition.setSelectedIndex(0);
         storedReturnDate = null;
@@ -633,8 +637,9 @@ public class Return extends javax.swing.JFrame {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error computing penalty.");
         }
-    }   
-                /**
+    }
+
+    /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
