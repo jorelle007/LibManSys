@@ -21,9 +21,9 @@ public class NewBook extends javax.swing.JFrame {
     private int selectedRow = 0;
 
     public NewBook() {
-        
+
     }
-    
+
     public NewBook(Connection conn, String userName) {
         initComponents();
         setLocationRelativeTo(null); // center window
@@ -448,7 +448,7 @@ public class NewBook extends javax.swing.JFrame {
                 return; // user canceled 
             }
             String enteredPassword = new String(pwdField.getPassword());
-
+     
             try {
                 // Step 2: Verify password in the database
                 UserDAO userDao = new UserDAO(conn);
@@ -464,15 +464,27 @@ public class NewBook extends javax.swing.JFrame {
                 boolean isDeleted = dao.deleteBook(bookId);
 
                 if (isDeleted) {
-                    JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
+                    JOptionPane.showMessageDialog(this, "Book " + title + "  has been successfully deleted.",
+                            "Success", JOptionPane.INFORMATION_MESSAGE);
+                    //JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
                     loadBookTable();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cannot delete this book. It is currently borrowed!",
+                            "Warning", JOptionPane.WARNING_MESSAGE);
                 }
 
             } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error deleting book: " + e.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
             }
+                
         }
+        
+             clearBookFields();
+             btnAdd.setEnabled(true);
+             btnUpdate.setEnabled(false);
+             btnDelete.setEnabled(false);
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
@@ -483,16 +495,40 @@ public class NewBook extends javax.swing.JFrame {
         // Check if combo box is default
         boolean comboDefault = cboCategory.getSelectedIndex() == 0; // or your default index
 
-        // Check if price is default (e.g., 0.0)
-        boolean priceDefault = txtPrice.getText().trim().isEmpty() || txtPrice.getText().trim().equals("0")
-                || txtPrice.getText().trim().equals("0");
+        String priceText = txtPrice.getText().trim();
+boolean priceInvalid = false;
 
-        if (comboDefault || priceDefault) {
+try {
+    if (priceText.isEmpty()) {
+        throw new NumberFormatException("Empty input");
+    }
+
+    double price = Double.parseDouble(priceText);
+
+    // Reject zero or negative values
+    if (price <= 0.0) {
+        priceInvalid = true;
+    }
+} catch (NumberFormatException e) {
+    priceInvalid = true; // Non-numeric input like letters or symbols
+}
+
+// Handle result
+if (priceInvalid) {
+    txtPrice.setBackground(Color.PINK); // Highlight error
+    JOptionPane.showMessageDialog(this, "Price must be a valid amount.");
+    txtPrice.requestFocus();
+    return; // Stop further execution
+} else {
+    txtPrice.setBackground(Color.WHITE); // Reset if valid
+}
+
+        if (comboDefault || priceInvalid) {
             String message = "The following fields are still at their default values:\n";
             if (comboDefault) {
                 message += "- Category\n";
             }
-            if (priceDefault) {
+            if (priceInvalid) {
                 message += "- Price\n";
             }
             message += "Do you want to continue?";
@@ -530,7 +566,12 @@ public class NewBook extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        clearBookFields();        
+        clearBookFields();
+
+        btnAdd.setEnabled(true);
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);        
+
     }//GEN-LAST:event_btnSearchActionPerformed
 
     //Private Helper methods
@@ -566,6 +607,9 @@ public class NewBook extends javax.swing.JFrame {
         txtYear.setText("");
         txtQuantity.setText("");
         txtPrice.setText("");
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
+        btnAdd.setEnabled(true);
     }
 
     private Book getBookFromFields() {
@@ -624,6 +668,7 @@ public class NewBook extends javax.swing.JFrame {
         // Numeric fields
         try {
             int year = Integer.parseInt(txtYear.getText().trim());
+            txtYear.setBackground(Color.WHITE);
             int currentYear = java.time.Year.now().getValue();
             if (year < 1900 || year > java.time.Year.now().getValue()) {
                 JOptionPane.showConfirmDialog(this, "Year must be between 1900 and "
@@ -631,6 +676,7 @@ public class NewBook extends javax.swing.JFrame {
                 txtYear.requestFocus();
             }
         } catch (NumberFormatException e) {
+            txtYear.setBackground(Color.PINK); 
             JOptionPane.showMessageDialog(this, "Year must be a number.");
             txtYear.requestFocus();
             return false;
@@ -638,7 +684,9 @@ public class NewBook extends javax.swing.JFrame {
 
         try {
             int quantity = Integer.parseInt(txtQuantity.getText().trim());
+            txtQuantity.setBackground(Color.WHITE);
         } catch (NumberFormatException e) {
+            txtQuantity.setBackground(Color.PINK); 
             JOptionPane.showMessageDialog(this, "Quantity must be a number.");
             txtQuantity.requestFocus();
             return false;

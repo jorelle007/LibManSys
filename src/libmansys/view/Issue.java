@@ -32,7 +32,7 @@ public class Issue extends javax.swing.JFrame {
     private int unreturnedRowCount;
 
     public Issue() {
-
+        this(null, null);
     }
 
     public Issue(Connection conn, String userName) {
@@ -208,7 +208,7 @@ public class Issue extends javax.swing.JFrame {
                 {null, null, null}
             },
             new String [] {
-                "Book ID", "Title", "Borrow Date"
+                "Book ID", "Title", "Due Date"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -597,17 +597,15 @@ public class Issue extends javax.swing.JFrame {
             SearchStudent searchStudent = new SearchStudent(this, conn, keyword);
             searchStudent.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, 
+            JOptionPane.showMessageDialog(this,
                     "Please enter a student ID, first name, or last name to search.",
                     "Empty Search",
                     JOptionPane.WARNING_MESSAGE);
         }
-
-
     }//GEN-LAST:event_btnSearchStudentActionPerformed
 
     private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
-        new Return(conn, selectedUnreturnedBookID).setVisible(true);
+        new Return(conn, selectedUnreturnedBookID, currentUserName).setVisible(true);
         this.setVisible(false);
     }//GEN-LAST:event_btnReturnActionPerformed
 
@@ -756,6 +754,23 @@ public class Issue extends javax.swing.JFrame {
 
         // Load unreturned books for this student
         loadUnreturnedBooks();
+        
+        
+        try {
+            int StudentID = Integer.parseInt(selectedStudentID);
+            if (issueDao.hasOverdueBooks(StudentID)) {
+                JOptionPane.showMessageDialog(this,
+                        "This student has overdue books!",
+                        "Overdue Notice",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error checking overdue books: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
 
         isComplete = validateBookStudentID();
         if (isComplete == true) {

@@ -27,7 +27,8 @@ public class LibManSys {
             //BorrowDAO borrowDao = new BorrowDAO(conn);
 
             //new Login(conn).setVisible(true);     //enable login                   
-            new Home(conn,"jorelle123", "JD Galam").setVisible(true);            
+            new Home(conn,"jorelle123", "JD Galam").setVisible(true);   
+            
 
         } catch (SQLException ex) {
             ex.printStackTrace();

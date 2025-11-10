@@ -13,14 +13,14 @@ public class Home extends javax.swing.JFrame {
     private String full_name;
 
     public Home() {
-        this(null, null, null); // calls the main constructor
+        this(null, null, null); 
     }
 
     public Home(Connection conn) {
-        this(conn, null, null); // calls the main constructor
+        this(conn, null, null); 
     }
 
-    public Home(Connection conn, String userName, String full_name) { //make it private after enabling the Login form
+    public Home(Connection conn, String userName, String full_name) { 
         initComponents();
         pack();
         setLocationRelativeTo(null);
@@ -331,7 +331,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_btnIssueBookActionPerformed
 
     private void btnReturnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnBookActionPerformed
-        new Return().setVisible(true);
+        new Return(conn, null, currentUsername).setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnReturnBookActionPerformed
 
