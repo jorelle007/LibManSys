@@ -26,6 +26,7 @@ public class Return extends javax.swing.JFrame {
     private ReturnDAO returnDAO;
     private String currentUsername;
     private String selectedBookID;
+    private String studentID;
     private java.sql.Date storedReturnDate;
     private int storedOverdue;
 
@@ -73,6 +74,8 @@ public class Return extends javax.swing.JFrame {
             loadSelectedBorrowedBook(selectedBookID);
             if (btrTable.getRowCount() == 1) {
                 btrTable.setRowSelectionInterval(0, 0); // select first and only row 
+                cboCondition.setSelectedIndex(0);
+                updatePenaltyAndDate();
             }
         }
 
@@ -133,6 +136,9 @@ public class Return extends javax.swing.JFrame {
         //set current date for return datepicker
         returnDate.setDate(new java.util.Date());
         returnDate.setDateFormatString("MM/dd/yyyy");
+        
+        java.util.Date utilDate = returnDate.getDate();
+        storedReturnDate = new java.sql.Date(utilDate.getTime());
     }
 
     private void loadSelectedBorrowedBook(String bookID) {
@@ -149,6 +155,8 @@ public class Return extends javax.swing.JFrame {
             txtName.setText(rs.getString("full_name"));
             txtCourse.setText(rs.getString("course"));
             txtEmail.setText(rs.getString("email_address"));
+            
+            studentID = txtStudentID.getText();
 
             // Fill the table with the selected borrowed book
             DefaultTableModel model = (DefaultTableModel) btrTable.getModel();
@@ -473,7 +481,7 @@ public class Return extends javax.swing.JFrame {
                 return;
             }
 
-            // Condition
+            // Condition            
             String condition = cboCondition.getSelectedItem().toString();
 
             // Penalty
@@ -505,6 +513,8 @@ public class Return extends javax.swing.JFrame {
             String keyword = txtSearch.getText().trim();
             if (!keyword.isEmpty()) {
                 loadBorrowToTable(btrTable, keyword);
+            } else {
+                loadBorrowToTable(btrTable, studentID);
             }
 
             txtPenalty.setText("0.00");
@@ -532,7 +542,7 @@ public class Return extends javax.swing.JFrame {
             txtStudentID.setText(first.get(6));
             txtName.setText(first.get(7));
             txtCourse.setText(first.get(8));
-            txtEmail.setText(first.get(9));
+            txtEmail.setText(first.get(9));                        
 
             // Add all borrowed books to the table
             for (ArrayList<String> borrow : borrows) {

@@ -468,6 +468,7 @@ public class NewBook extends javax.swing.JFrame {
                             "Success", JOptionPane.INFORMATION_MESSAGE);
                     //JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
                     loadBookTable();
+                    clearBookFields();
                 } else {
                     JOptionPane.showMessageDialog(this, "Cannot delete this book. It is currently borrowed!",
                             "Warning", JOptionPane.WARNING_MESSAGE);
