@@ -12,15 +12,16 @@ import libmansys.utils.Helper;
 
 public class SearchStudent extends javax.swing.JFrame {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SearchStudent.class.getName());
+    //private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SearchStudent.class.getName());
     private Issue issueSearch;
     private Connection conn;
     private IssueDAO issueDao;
     private int selectedRow;
 
-    /**
-     * Creates new form SearchStudent
-     */
+    public SearchStudent() {
+
+    }
+
     public SearchStudent(Issue issueSearch, Connection conn, String keyword) {
         initComponents();
         setLocationRelativeTo(null);
@@ -155,7 +156,7 @@ public class SearchStudent extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnSelectStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectStudentActionPerformed
-        selectStudent();        
+        selectStudent();
     }//GEN-LAST:event_btnSelectStudentActionPerformed
 
     private void btnSelectStudentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSelectStudentMouseClicked
@@ -181,10 +182,37 @@ public class SearchStudent extends javax.swing.JFrame {
                 model.addRow(row);
             }
 
+            int rowCount = model.getRowCount();
+
             // 🔹 Auto-select if only one result
-            if (model.getRowCount() == 1) {
+            if (rowCount == 1) {
                 tblStudents.setRowSelectionInterval(0, 0); // select first and only row                
                 SwingUtilities.invokeLater(() -> btnSelectStudent.doClick());
+            } else if (rowCount == 0) {
+                // 🔹 No results found
+                JOptionPane.showMessageDialog(this,
+                        "No students found matching your search.",
+                        "No Results",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // Ask user if they want to add a new student
+                int choice = JOptionPane.showConfirmDialog(this,
+                        "Would you like to add a new student?",
+                        "Add New Student",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+
+                // Close this frame and go back to parent(Issue or call Student)         
+                SwingUtilities.invokeLater(() -> {
+                    SearchStudent.this.setVisible(false); // hide first
+                    // Open Add Student frame if YES
+                    if (choice == JOptionPane.YES_OPTION) {
+                        new Student(conn).setVisible(true);
+                        issueSearch.setVisible(false);
+                    }
+                    
+                    SearchStudent.this.dispose();   // close current frame
+                });
             }
 
         } catch (SQLException e) {
@@ -228,12 +256,12 @@ public class SearchStudent extends javax.swing.JFrame {
                 }
             }
         } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+            //logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
-        //java.awt.EventQueue.invokeLater(() -> new SearchStudent().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new SearchStudent().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

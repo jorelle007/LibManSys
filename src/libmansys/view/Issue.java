@@ -208,7 +208,7 @@ public class Issue extends javax.swing.JFrame {
                 {null, null, null}
             },
             new String [] {
-                "Book ID", "Title", "Borrow Date"
+                "Book ID", "Title", "Due Date"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -602,8 +602,6 @@ public class Issue extends javax.swing.JFrame {
                     "Empty Search",
                     JOptionPane.WARNING_MESSAGE);
         }
-
-
     }//GEN-LAST:event_btnSearchStudentActionPerformed
 
     private void btnReturnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReturnActionPerformed
@@ -756,6 +754,23 @@ public class Issue extends javax.swing.JFrame {
 
         // Load unreturned books for this student
         loadUnreturnedBooks();
+        
+        
+        try {
+            int StudentID = Integer.parseInt(selectedStudentID);
+            if (issueDao.hasOverdueBooks(StudentID)) {
+                JOptionPane.showMessageDialog(this,
+                        "This student has overdue books!",
+                        "Overdue Notice",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error checking overdue books: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
 
         isComplete = validateBookStudentID();
         if (isComplete == true) {
