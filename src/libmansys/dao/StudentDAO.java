@@ -224,13 +224,14 @@ public class StudentDAO {
                OR (r.penalty > 0 AND r.isPaid = FALSE))
         """;
 
+
         try (PreparedStatement ps = conn.prepareStatement(checkQuery)) {
             ps.setInt(1, studentId);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next() && rs.getInt(1) == 0) {
                 // Safe to soft-delete
-                String deleteQuery = "UPDATE tstudent SET isDeleted = TRUE, deletedAt = NOW() WHERE student_id = ?";
+                String deleteQuery = "UPDATE tstudent SET is_deleted = TRUE, deleted_at = NOW() WHERE student_id = ?";
                 try (PreparedStatement psDel = conn.prepareStatement(deleteQuery)) {
                     psDel.setInt(1, studentId);
                     psDel.executeUpdate();
@@ -240,6 +241,37 @@ public class StudentDAO {
                 return false; // cannot delete, book is borrowed
             }
         }
+    }
+
+    public boolean studentExists(String keyword) {
+        String sql = "SELECT COUNT(*) FROM tstudent "
+                + "WHERE student_id = ? "
+                + "OR first_name LIKE ? "
+                + "OR last_name LIKE ?";
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            int studentId = -1;
+            try {
+                studentId = Integer.parseInt(keyword); 
+            } catch (NumberFormatException e) {
+                studentId = -1; 
+            }
+
+            pst.setInt(1, studentId);          // student_id = ?
+            pst.setString(2, "%" + keyword + "%"); // first_name LIKE ?
+            pst.setString(3, "%" + keyword + "%"); // last_name LIKE ?
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // true if student exists
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking student existence: " + e.getMessage());
+        }
+
+        return false; // default → not found
     }
 //        String sql = "DELETE FROM tstudent WHERE student_id = ?"; // pagdelete sa student
 //

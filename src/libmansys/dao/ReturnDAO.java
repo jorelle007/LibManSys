@@ -143,9 +143,12 @@ public class ReturnDAO {
 
             // Determine tbtr status based on condition
             String status = "Returned";
-            if (condition.equals("Damaged")) {
-                status = "Returned - Damaged";
-            } else if (condition.equals("Lost")) {
+
+            if ("Minor Damage".equals(condition)) {
+                status = "Returned - Minor Damage";
+            } else if ("Major Damage".equals(condition)) {
+                status = "Returned - Major Damage";
+            } else if ("Lost".equals(condition)) {
                 status = "Returned - Lost";
             }
 

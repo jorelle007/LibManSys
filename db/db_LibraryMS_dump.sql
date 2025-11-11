@@ -31,6 +31,8 @@ CREATE TABLE `tbook` (
   `year_published` year(4) DEFAULT NULL,
   `quantity` smallint(5) unsigned DEFAULT NULL,
   `price` decimal(10,4) DEFAULT NULL,
+   `is_deleted` BOOLEAN default NULL,
+    `deleted_at` TIMESTAMP,
   PRIMARY KEY (`book_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -58,7 +60,7 @@ CREATE TABLE `tbtr` (
   `borrow_date` date DEFAULT NULL,
   `due_date` date DEFAULT NULL,
   `status` varchar(100) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
+  `username` int(11) DEFAULT NULL,
   PRIMARY KEY (`btr_id`),
   KEY `student_id` (`student_id`),
   KEY `book_id` (`book_id`),
@@ -90,7 +92,7 @@ CREATE TABLE `treturn` (
   `condition_on_return` varchar(100) NOT NULL,
   `days_overdue` int(11) DEFAULT 0,
   `penalty` decimal(10,4) DEFAULT 0.0000,
-  `user_id` int(11) DEFAULT NULL,
+  `username` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`return_id`),
   KEY `btr_id` (`btr_id`),
   CONSTRAINT `treturn_ibfk_1` FOREIGN KEY (`btr_id`) REFERENCES `tbtr` (`btr_id`)
@@ -121,6 +123,8 @@ CREATE TABLE `tstudent` (
   `contact_no` varchar(15) DEFAULT NULL,
   `email_address` varchar(100) DEFAULT NULL,
   `date_registered` date DEFAULT NULL,
+  `is_deleted` BOOLEAN default NULL,
+  `deleted_at` TIMESTAMP,
   PRIMARY KEY (`student_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -176,43 +180,73 @@ UNLOCK TABLES;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_loginUser`(IN `p_username` VARCHAR(50), IN `p_password` VARCHAR(255))
-BEGIN
-    DECLARE user_count INT;
-
-    -- Count matching user
-    SELECT COUNT(*) INTO user_count
-    FROM tusers
-    WHERE username = p_username
-      AND password = p_password;
-
-    -- If user exists
-    IF user_count = 1 THEN
-        -- Return user info
-        SELECT full_name
-        FROM tusers
-        WHERE username = p_username
-          AND password = p_password;
-
-        -- Update last login
-        UPDATE tusers
-        SET last_login = CURRENT_TIMESTAMP
-        WHERE username = p_username
-          AND password = p_password;
-    END IF;
+BEGIN
+
+    DECLARE user_count INT;
+
+
+
+    -- Count matching user
+
+    SELECT COUNT(*) INTO user_count
+
+    FROM tusers
+
+    WHERE username = p_username
+
+      AND password = p_password;
+
+
+
+    -- If user exists
+
+    IF user_count = 1 THEN
+
+        -- Return user info
+
+        SELECT full_name
+
+        FROM tusers
+
+        WHERE username = p_username
+
+          AND password = p_password;
+
+
+
+        -- Update last login
+
+        UPDATE tusers
+
+        SET last_login = CURRENT_TIMESTAMP
+
+        WHERE username = p_username
+
+          AND password = p_password;
+
+    END IF;
+
 END ;;
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-04 23:33:26
+-- to alter the table
+ALTER TABLE tbook ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;
+ALTER TABLE tBook ADD COLUMN deleted_at TIMESTAMP NULL;
+
+ALTER TABLE tStudent ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;
+ALTER TABLE tStudent ADD COLUMN deleted_at TIMESTAMP NULL;
+
+
+-- if you have camelCase table. you can rename using these:
+RENAME TABLE tBook TO tbook;
+RENAME TABLE tUsers TO tuser;
+RENAME TABLE tStudent TO tstudent;
+RENAME TABLE tBtr TO tbtr;
+RENAME TABLE tReturn TO tretun;
+
+ALTER TABLE tbook RENAME COLUMN isDeleted to is_deleted;
+ALTER TABLE tbook RENAME COLUMN deletedAt to deleted_at;
+ALTER TABLE tstudent RENAME COLUMN isDeleted to is_deleted;
+ALTER TABLE tstudent RENAME COLUMN deletedAt to deleted_at;
+

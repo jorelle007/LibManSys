@@ -154,7 +154,7 @@ public class BookDAO {
 
     //Delete Book
     public boolean deleteBook(int bookID) throws SQLException {
-        String checkQuery = "SELECT COUNT(*) FROM tBTR b "
+        String checkQuery = "SELECT COUNT(*) FROM tbtr b "
                 + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
                 + "WHERE b.book_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
 
@@ -164,7 +164,7 @@ public class BookDAO {
 
             if (rs.next() && rs.getInt(1) == 0) {
                 // Safe to soft-delete
-                String deleteQuery = "UPDATE tBook SET isDeleted = TRUE, deletedAt = NOW() WHERE book_id = ?";
+                String deleteQuery = "UPDATE tbook SET is_deleted = TRUE, deleted_at = NOW() WHERE book_id = ?";
                 try (PreparedStatement psDel = conn.prepareStatement(deleteQuery)) {
                     psDel.setInt(1, bookID);
                     psDel.executeUpdate();

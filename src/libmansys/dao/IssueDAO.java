@@ -20,7 +20,7 @@ public class IssueDAO {
     // Get all available books
     public List<Book> getAllAvailableBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM tBook WHERE quantity > 0";
+        String sql = "SELECT * FROM tbook WHERE quantity > 0";
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -87,9 +87,9 @@ public class IssueDAO {
 
         String sql = "SELECT btr.btr_id, btr.student_id, btr.book_id, b.title, "
                 + "btr.borrow_date, btr.due_date "
-                + "FROM tBTR btr "
-                + "JOIN tBook b ON btr.book_id = b.book_id "
-                + "LEFT JOIN tReturn r ON btr.btr_id = r.btr_id "
+                + "FROM tbtr btr "
+                + "JOIN tbook b ON btr.book_id = b.book_id "
+                + "LEFT JOIN treturn r ON btr.btr_id = r.btr_id "
                 + "WHERE btr.student_id = ? AND r.btr_id IS NULL";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -116,10 +116,10 @@ public class IssueDAO {
             java.sql.Date dueDate,
             String status,
             String username) {
-        String insertBtrSQL = "INSERT INTO tBTR (student_id, book_id, borrow_date, due_date, status, username) "
+        String insertBtrSQL = "INSERT INTO tbtr (student_id, book_id, borrow_date, due_date, status, username) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
 
-        String updateBookSQL = "UPDATE tBook SET quantity = quantity - 1 WHERE book_id = ?";
+        String updateBookSQL = "UPDATE tbook SET quantity = quantity - 1 WHERE book_id = ?";
 
         try {
             conn.setAutoCommit(false); // start transaction
@@ -163,8 +163,8 @@ public class IssueDAO {
 
     public boolean hasOverdueBooks(int studentID) throws SQLException {
         String query = "SELECT COUNT(*) AS overdueCount "
-                + "FROM tBTR b "
-                + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
+                + "FROM tbtr b "
+                + "LEFT JOIN treturn r ON b.btr_id = r.btr_id "
                 + "WHERE b.student_id = ? "
                 + "AND r.return_date IS NULL "
                 + "AND b.due_date < CURDATE()";
