@@ -247,6 +247,8 @@ public class Return extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel8.setText("Condition");
 
+        returnDate.setMaxSelectableDate(new java.util.Date());
+
         cboCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Good", "Lost", "Minor Damage", "Major Damage" }));
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N

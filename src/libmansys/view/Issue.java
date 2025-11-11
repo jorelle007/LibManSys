@@ -351,6 +351,8 @@ public class Issue extends javax.swing.JFrame {
 
         jLabel2.setText("Book ID");
 
+        dtDueDate.setMinSelectableDate(new java.util.Date());
+
         jLabel6.setText("Due Date");
 
         dtBorrowDate.setBorder(javax.swing.BorderFactory.createEtchedBorder());

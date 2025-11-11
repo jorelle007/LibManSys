@@ -249,6 +249,9 @@
           </Properties>
         </Component>
         <Component class="com.toedter.calendar.JDateChooser" name="returnDate">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="returnDate.setMaxSelectableDate(new java.util.Date());"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JComboBox" name="cboCondition">
           <Properties>
