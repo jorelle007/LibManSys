@@ -74,7 +74,7 @@ public class BookDAO {
 
     public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM tbook WHERE isDeleted = FALSE";
+        String sql = "SELECT * FROM tbook";
 
         try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 

@@ -5,6 +5,7 @@ import libmansys.dao.*;
 import libmansys.view.Login;
 import java.sql.*;
 import libmansys.view.Home;
+import libmansys.view.SignUp;
 
 //import libmansys.view.LoginFrame;
 /**
@@ -27,7 +28,8 @@ public class LibManSys {
             //BorrowDAO borrowDao = new BorrowDAO(conn);
 
             //new Login(conn).setVisible(true);     //enable login                   
-            new Home(conn,"jorelle123", "JD Galam").setVisible(true);   
+            new Home(conn,"jorelle123", "JD Galam").setVisible(true); 
+            
             
 
         } catch (SQLException ex) {
