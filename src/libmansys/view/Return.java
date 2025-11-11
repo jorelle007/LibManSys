@@ -523,12 +523,11 @@ public class Return extends javax.swing.JFrame {
                 return;
             }
 
-            // If book is returned in good condition → add 1 to quantity
-            if (condition.equals("Good")) {
+            // If book is returned in good condition and minor damage → add 1 to quantity
+            if ("Good".equals(condition) || "Minor Damage".equals(condition)) {
                 returnDAO.increaseQty(bookId);
+                JOptionPane.showMessageDialog(this, "Book return successfully saved!");
             }
-
-            JOptionPane.showMessageDialog(this, "Book return successfully saved!");
 
             // Refresh table
             String keyword = txtSearch.getText().trim();
