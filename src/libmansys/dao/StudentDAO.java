@@ -35,7 +35,7 @@ public class StudentDAO {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent WHERE isDeleted = FALSE")) {
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent WHERE is_deleted = FALSE")) {
 
             while (rs.next()) {
                 Object[] row = new Object[8];
@@ -112,7 +112,7 @@ public class StudentDAO {
     }
 
     public boolean deleteStudent(int studentId) throws SQLException {
-        String checkQuery = "SELECT COUNT(*) FROM tBTR b "
+        String checkQuery = "SELECT COUNT(*) FROM tbtr b "
                 + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
                 + "WHERE b.student_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
 
@@ -122,7 +122,7 @@ public class StudentDAO {
 
             if (rs.next() && rs.getInt(1) == 0) {
                 // Safe to soft-delete
-                String deleteQuery = "UPDATE tstudent SET isDeleted = TRUE, deletedAt = NOW() WHERE student_id = ?";
+                String deleteQuery = "UPDATE tstudent SET is_deleted = TRUE, deleted_at = NOW() WHERE student_id = ?";
                 try (PreparedStatement psDel = conn.prepareStatement(deleteQuery)) {
                     psDel.setInt(1, studentId);
                     psDel.executeUpdate();
