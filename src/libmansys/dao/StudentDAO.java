@@ -1,6 +1,7 @@
 package libmansys.dao;
 
 import java.sql.*;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -35,53 +36,155 @@ public class StudentDAO {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent WHERE isDeleted = FALSE")) {
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tStudent WHERE isDeleted = FALSE")) {
 
             while (rs.next()) {
-                Object[] row = new Object[8];
-                row[0] = rs.getInt("student_id");
+                Object[] row = new Object[10]; // increase size for penalty + isPaid
+                int studentId = rs.getInt("student_id");
+
+                row[0] = studentId;
                 row[1] = rs.getString("first_name");
                 row[2] = rs.getString("last_name");
                 row[3] = rs.getString("course");
                 row[4] = rs.getString("contact_no");
                 row[5] = rs.getString("email_address");
-                row[6] = rs.getDate("date_registered");
+                //row[6] = rs.getDate("date_registered");
+
+                // Compute total penalty dynamically
+                String penaltyQuery = "SELECT COALESCE(SUM(CASE WHEN r.isPaid = 0 THEN r.penalty ELSE 0 END), 0) AS total_penalty "
+                    + "FROM tReturn r "
+                    + "JOIN tBTR b ON r.btr_id = b.btr_id "
+                    + "WHERE b.student_id = ?";
+
+                try (PreparedStatement ps = conn.prepareStatement(penaltyQuery)) {
+                    ps.setInt(1, studentId);
+                    try (ResultSet rs2 = ps.executeQuery()) {
+                        double totalPenalty = 0;
+                        if (rs2.next()) {
+                            totalPenalty = rs2.getDouble("total_penalty");
+                        }
+
+                        row[6] = totalPenalty;      // Total Penalty column
+                        row[7] = totalPenalty == 0; // isPaid column: true if nothing unpaid
+                    }
+                }
 
                 model.addRow(row);
             }
-
         } catch (SQLException e) {
             System.out.println("Error loading students: " + e.getMessage());
         }
     }
 
-    public void updateStudent(int studentId, String firstName, String lastName, String course,
-            String contactNo, String emailAddress) { // pag update ng student
+//        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent WHERE isDeleted = FALSE")) {
+//
+//            while (rs.next()) {
+//                Object[] row = new Object[8];
+//                row[0] = rs.getInt("student_id");
+//                row[1] = rs.getString("first_name");
+//                row[2] = rs.getString("last_name");
+//                row[3] = rs.getString("course");
+//                row[4] = rs.getString("contact_no");
+//                row[5] = rs.getString("email_address");
+//                row[6] = rs.getDate("date_registered");
+//
+//                model.addRow(row);
+//            }
+    
+    public boolean updateStudent(int studentId, String firstName, String lastName, String course,
+                             String contactNo, String emailAddress, boolean isPaid) throws SQLException {
 
-        String sql = "UPDATE tstudent SET first_name = ?, last_name = ?, course = ?, "
-                + "contact_no = ?, email_address = ? WHERE student_id = ?";
+    String sqlStudent = "UPDATE tStudent SET first_name = ?, last_name = ?, course = ?, contact_no = ?, email_address = ? "
+                      + "WHERE student_id = ?";
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+    String sqlPenalties = "UPDATE tReturn r "
+                        + "JOIN tBTR b ON r.btr_id = b.btr_id "
+                        + "SET r.isPaid = ? "
+                        + "WHERE b.student_id = ? AND r.isPaid = 0"; // only update unpaid penalties
 
-            pst.setString(1, firstName);
-            pst.setString(2, lastName);
-            pst.setString(3, course);
-            pst.setString(4, contactNo);
-            pst.setString(5, emailAddress);
-            pst.setInt(6, studentId);
+    boolean success = false;
 
-            int rows = pst.executeUpdate();
+    // Start transaction
+    try {
+        conn.setAutoCommit(false);
 
-            if (rows > 0) {
-                System.out.println("Student updated successfully!");
-            } else {
-                System.out.println("No changes made for student ID: " + studentId);
-            }
+        try (PreparedStatement pstStudent = conn.prepareStatement(sqlStudent);
+             PreparedStatement pstPenalties = conn.prepareStatement(sqlPenalties)) {
 
-        } catch (SQLException e) {
-            System.out.println("Error updating student: " + e.getMessage());
+            // Update student info
+            pstStudent.setString(1, firstName);
+            pstStudent.setString(2, lastName);
+            pstStudent.setString(3, course);
+            pstStudent.setString(4, contactNo);
+            pstStudent.setString(5, emailAddress);
+            pstStudent.setInt(6, studentId);
+            pstStudent.executeUpdate();
+
+            // Update unpaid penalties
+            pstPenalties.setBoolean(1, isPaid);
+            pstPenalties.setInt(2, studentId);
+            pstPenalties.executeUpdate();
+
+            // Commit if both updates succeed
+            conn.commit();
+            success = true;
+
+        } catch (SQLException ex) {
+            conn.rollback(); // rollback if any update fails
+            throw ex; // rethrow exception to handle in calling code
+        } finally {
+            conn.setAutoCommit(true); // restore default
         }
+
+    } catch (SQLException e) {
+        throw e;
     }
+
+    return success;
+}
+//
+//    
+//    public boolean updateStudent(int studentId, String firstName, String lastName, String course,
+//            String contactNo, String emailAddress, boolean isPaid) {
+//
+//        String sql = "UPDATE tStudent SET first_name = ?, last_name = ?, course = ?, "
+//                + "contact_no = ?, email_address = ? WHERE student_id = ?";
+//
+//        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+//            pst.setString(1, firstName);
+//            pst.setString(2, lastName);
+//            pst.setString(3, course);
+//            pst.setString(4, contactNo);
+//            pst.setString(5, emailAddress);
+//            pst.setInt(6, studentId);
+//
+//            pst.executeUpdate();
+//
+//            // ✅ If checkbox is checked, mark all unpaid penalties as paid
+//            if (isPaid) {
+//                String paySql = """
+//                UPDATE tReturn r
+//                JOIN tBTR b ON r.btr_id = b.btr_id
+//                SET r.isPaid = TRUE
+//                WHERE b.student_id = ? AND r.isPaid = FALSE
+//            """;
+//
+//                try (PreparedStatement payStmt = conn.prepareStatement(paySql)) {
+//                    payStmt.setInt(1, studentId);
+//                    payStmt.executeUpdate();
+//                }
+//            }
+//
+//            return true;
+//
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(null,
+//                    "Error updating student: " + e.getMessage(),
+//                    "Database Error",
+//                    JOptionPane.ERROR_MESSAGE);
+//            return false;
+//        }
+//    }
 
     public void addStudent(String firstName, String lastName, String course,
             String contactNo, String emailAddress, java.sql.Date dateRegistered) { //pag add ng new student
@@ -112,9 +215,14 @@ public class StudentDAO {
     }
 
     public boolean deleteStudent(int studentId) throws SQLException {
-        String checkQuery = "SELECT COUNT(*) FROM tBTR b "
-                + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
-                + "WHERE b.student_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
+        String checkQuery = """
+        SELECT COUNT(*) 
+        FROM tBTR b
+        LEFT JOIN tReturn r ON b.btr_id = r.btr_id
+        WHERE b.student_id = ?
+          AND (r.return_date IS NULL 
+               OR (r.penalty > 0 AND r.isPaid = FALSE))
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(checkQuery)) {
             ps.setInt(1, studentId);

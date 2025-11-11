@@ -7,6 +7,7 @@ import libmansys.dao.StudentDAO;
 import java.awt.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import libmansys.dao.UserDAO;
 import libmansys.model.User;
 import libmansys.utils.Helper;
@@ -17,6 +18,7 @@ public class Student extends javax.swing.JFrame {
     private StudentDAO studentDAO;
     private Connection conn;
     private String currentUsername;
+    private double originalTotalPenalty = 0.0;
 
     public Student() {
         this(null, null);
@@ -37,6 +39,10 @@ public class Student extends javax.swing.JFrame {
         this.conn = conn;
         this.currentUsername = currentUsername;
 
+        txtTotalPenalty.setText("0.0000");
+        txtTotalPenalty.setEditable(false);
+        chkPaid.setEnabled(false);
+
         // Modify the design of table
         JTableHeader header = tblStudents.getTableHeader();
         header.setFont(header.getFont().deriveFont(Font.BOLD));
@@ -47,6 +53,9 @@ public class Student extends javax.swing.JFrame {
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setHorizontalAlignment(JLabel.CENTER);
         renderer.setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10)); // padding
+
+        TableColumn paidColumn = tblStudents.getColumnModel().getColumn(7);
+        tblStudents.getColumnModel().removeColumn(paidColumn); // hides Paid column
         Helper.autoResizeColumns(tblStudents);
 
         for (int i = 0; i < tblStudents.getColumnCount(); i++) {
@@ -73,29 +82,6 @@ public class Student extends javax.swing.JFrame {
         tableClick();
     }
 
-    private void getNextID() {
-        txtStudentID.setText(String.valueOf(studentDAO.getNextStudentId()));
-        txtStudentID.setEnabled(false);
-    }
-
-    private void disableButtons() {
-        btnUpdate.setEnabled(false);
-        btnDelete.setEnabled(false);
-    }
-
-    private void loadStudents() {
-        studentDAO.loadStudents(tblStudents);
-    }
-
-    private void clearTextFields() {
-        txtFirstName.setText("");
-        txtLastName.setText("");
-        txtCourse.setText("");
-        txtContact.setText("");
-        txtEmail.setText("");
-        tblStudents.clearSelection();
-    }
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -116,13 +102,16 @@ public class Student extends javax.swing.JFrame {
         btnAdd = new javax.swing.JButton();
         btnUpdate = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnClear = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        txtTotalPenalty = new javax.swing.JTextField();
+        chkPaid = new javax.swing.JCheckBox();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblStudents = new javax.swing.JTable();
         txtSearch1 = new javax.swing.JTextField();
         txtSearch = new javax.swing.JTextField();
         btnHome = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -179,14 +168,13 @@ public class Student extends javax.swing.JFrame {
             }
         });
 
-        btnClear.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnClear.setText("CLEAR");
-        btnClear.setMaximumSize(new java.awt.Dimension(112, 31));
-        btnClear.setMinimumSize(new java.awt.Dimension(112, 31));
-        btnClear.setPreferredSize(new java.awt.Dimension(112, 31));
-        btnClear.addActionListener(new java.awt.event.ActionListener() {
+        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel5.setText("Total Penalty");
+
+        chkPaid.setText("Paid");
+        chkPaid.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearActionPerformed(evt);
+                chkPaidActionPerformed(evt);
             }
         });
 
@@ -197,69 +185,75 @@ public class Student extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3)
                     .addComponent(jLabel4)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel7))
-                        .addGap(35, 35, 35)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtContact, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtLastName, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnUpdate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel2)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel6)
+                                .addComponent(jLabel5)
+                                .addComponent(jLabel1)
+                                .addComponent(jLabel7))
+                            .addGap(18, 18, 18)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtContact, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(txtTotalPenalty, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(chkPaid))
+                                .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtLastName, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGap(14, 14, 14)
+                            .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnUpdate)
+                            .addGap(18, 18, 18)
+                            .addComponent(btnDelete))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(49, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtStudentID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(24, 24, 24)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(21, 21, 21)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtLastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(jLabel4))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(21, 21, 21)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtCourse, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(txtContact, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtTotalPenalty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(chkPaid))
+                .addGap(52, 52, 52)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAdd)
                     .addComponent(btnUpdate)
-                    .addComponent(btnDelete)
-                    .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26))
+                    .addComponent(btnDelete))
+                .addGap(28, 28, 28))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 0, 153)), "Student Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 24), new java.awt.Color(204, 0, 205))); // NOI18N
@@ -267,18 +261,34 @@ public class Student extends javax.swing.JFrame {
         tblStudents.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
         tblStudents.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Student ID", "First Name", "Last Name", "Course", "Contact Number", "Email Address", "Date Registered"
+                "Student ID", "First Name", "Last Name", "Course", "Contact Number", "Email Address", "Total Penalty", "Paid"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, true, true, true, true, true, true, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblStudents.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblStudents.setAutoscrolls(false);
         tblStudents.setFillsViewportHeight(true);
+        tblStudents.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tblStudents.setShowGrid(true);
         jScrollPane1.setViewportView(tblStudents);
 
@@ -291,11 +301,9 @@ public class Student extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                    .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 626, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(0, 0, Short.MAX_VALUE)
@@ -326,6 +334,17 @@ public class Student extends javax.swing.JFrame {
             }
         });
 
+        btnClear.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnClear.setText("CLEAR");
+        btnClear.setMaximumSize(new java.awt.Dimension(112, 31));
+        btnClear.setMinimumSize(new java.awt.Dimension(112, 31));
+        btnClear.setPreferredSize(new java.awt.Dimension(112, 31));
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -333,14 +352,12 @@ public class Student extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnHome)))
-                .addGap(93, 93, 93))
+                .addGap(10, 10, 10)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnHome)
+                    .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -352,6 +369,8 @@ public class Student extends javax.swing.JFrame {
                         .addComponent(btnHome)
                         .addGap(18, 18, 18)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -365,6 +384,7 @@ public class Student extends javax.swing.JFrame {
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
         Helper.goBackToHome(this, conn, currentUsername);
+        this.dispose();
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
@@ -406,19 +426,27 @@ public class Student extends javax.swing.JFrame {
         }
 
         try {
+            // Convert view row to model row if sorter is active
+            int modelRow = tblStudents.convertRowIndexToModel(row);
 
-            String tableFirstName = tblStudents.getValueAt(row, 1).toString();
-            String tableLastName = tblStudents.getValueAt(row, 2).toString();
-            String tableCourse = tblStudents.getValueAt(row, 3).toString();
-            String tableContact = tblStudents.getValueAt(row, 4).toString();
-            String tableEmail = tblStudents.getValueAt(row, 5).toString();
+            // Get current values from the table
+            String tableFirstName = tblStudents.getModel().getValueAt(modelRow, 1).toString();
+            String tableLastName = tblStudents.getModel().getValueAt(modelRow, 2).toString();
+            String tableCourse = tblStudents.getModel().getValueAt(modelRow, 3).toString();
+            String tableContact = tblStudents.getModel().getValueAt(modelRow, 4).toString();
+            String tableEmail = tblStudents.getModel().getValueAt(modelRow, 5).toString();
+            originalTotalPenalty = ((Number) tblStudents.getModel().getValueAt(modelRow, 6)).doubleValue();
+            Boolean tablePaid = (Boolean) tblStudents.getModel().getValueAt(modelRow, 7);
 
+            // Get values from the form
             String firstName = txtFirstName.getText().trim();
             String lastName = txtLastName.getText().trim();
             String course = txtCourse.getText().trim();
             String contact = txtContact.getText().trim();
             String email = txtEmail.getText().trim();
+            Boolean isPaid = chkPaid.isSelected();
 
+            // Validate form
             if (firstName.isEmpty() || lastName.isEmpty() || course.isEmpty()
                     || contact.isEmpty() || email.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill out all fields.",
@@ -426,22 +454,32 @@ public class Student extends javax.swing.JFrame {
                 return;
             }
 
+            // Check if any changes were actually made
             if (firstName.equals(tableFirstName)
                     && lastName.equals(tableLastName)
                     && course.equals(tableCourse)
                     && contact.equals(tableContact)
-                    && email.equals(tableEmail)) {
+                    && email.equals(tableEmail)
+                    && isPaid.equals(tablePaid)) {
                 JOptionPane.showMessageDialog(this, "No changes were made.");
                 return;
             }
 
-            int studentId = Integer.parseInt(tblStudents.getValueAt(row, 0).toString());
+            // Get student ID
+            int studentId = Integer.parseInt(tblStudents.getModel().getValueAt(modelRow, 0).toString());
 
-            studentDAO.updateStudent(studentId, firstName, lastName, course, contact, email);
-            JOptionPane.showMessageDialog(this, "Student updated successfully!");
+            // Call DAO method that updates student info and unpaid penalties in a transaction
+            boolean isUpdated = studentDAO.updateStudent(studentId, firstName, lastName, course, contact, email, isPaid);
 
+            if (isUpdated) {
+                JOptionPane.showMessageDialog(this, "Student updated successfully!");
+            }
+
+            // Clear form and reload table
             clearTextFields();
-            loadStudents();
+            tblStudents.setRowSorter(null);          // temporarily remove sorter
+            loadStudents();                           // reload table from DAO
+            tblStudents.setAutoCreateRowSorter(true); // re-enable sorting
             getNextID();
 
         } catch (Exception e) {
@@ -499,7 +537,7 @@ public class Student extends javax.swing.JFrame {
                         loadStudents();
                         clearTextFields();
                     } else {
-                        JOptionPane.showMessageDialog(this, "Cannot delete student: borrowed books not returned!",
+                        JOptionPane.showMessageDialog(this, "Cannot delete this student. Unreturned books or unpaid penalties exist.",
                                 "Warning", JOptionPane.WARNING_MESSAGE);
                     }
                 }
@@ -526,6 +564,14 @@ public class Student extends javax.swing.JFrame {
         clearTextFields();
     }//GEN-LAST:event_btnClearActionPerformed
 
+    private void chkPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPaidActionPerformed
+        if (chkPaid.isSelected()) {
+            txtTotalPenalty.setText("0.0000");
+        } else {
+            txtTotalPenalty.setText(String.format("%.4f", originalTotalPenalty));
+        }
+    }//GEN-LAST:event_chkPaidActionPerformed
+
     private void tableClick() {
         tblStudents.getSelectionModel().addListSelectionListener(e -> {
             int row = tblStudents.getSelectedRow();
@@ -542,8 +588,50 @@ public class Student extends javax.swing.JFrame {
                 txtCourse.setText(tblStudents.getValueAt(row, 3).toString());
                 txtContact.setText(tblStudents.getValueAt(row, 4).toString());
                 txtEmail.setText(tblStudents.getValueAt(row, 5).toString());
+                chkPaid.setSelected((Boolean) tblStudents.getModel().getValueAt(row, 7));
+
+                originalTotalPenalty = ((Number) tblStudents.getModel().getValueAt(row, 6)).doubleValue();
+
+                // Set total penalty text field with 4 decimal places
+                txtTotalPenalty.setText(String.format("%.4f", originalTotalPenalty));
+
+                // If totalPenalty is 0, disable and uncheck checkbox
+                if (originalTotalPenalty == 0.0) {
+                    chkPaid.setSelected(false);
+                    chkPaid.setEnabled(false);
+                } else {
+                    chkPaid.setSelected(false);
+                    chkPaid.setEnabled(true);
+                }
             }
         });
+    }
+
+    private void getNextID() {
+        txtStudentID.setText(String.valueOf(studentDAO.getNextStudentId()));
+        txtStudentID.setEnabled(false);
+    }
+
+    private void disableButtons() {
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
+    }
+
+    private void loadStudents() {
+        studentDAO.loadStudents(tblStudents);
+    }
+
+    private void clearTextFields() {
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtCourse.setText("");
+        txtContact.setText("");
+        txtEmail.setText("");
+        tblStudents.clearSelection();
+        txtTotalPenalty.setText("0.0000");
+        chkPaid.setSelected(false);
+        chkPaid.setEnabled(false);
+
     }
 
     /**
@@ -587,10 +675,12 @@ public class Student extends javax.swing.JFrame {
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnHome;
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JCheckBox chkPaid;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
@@ -605,5 +695,6 @@ public class Student extends javax.swing.JFrame {
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtSearch1;
     private javax.swing.JTextField txtStudentID;
+    private javax.swing.JTextField txtTotalPenalty;
     // End of variables declaration//GEN-END:variables
 }

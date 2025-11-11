@@ -50,7 +50,7 @@ public class IssueDAO {
         String sql = "SELECT student_id, first_name, last_name, "
                 + "course, email_address "
                 + "FROM tStudent "
-                + "WHERE student_id LIKE ? "
+                + "WHERE student_id = ? "
                 + "OR first_name LIKE ? "
                 + "OR last_name LIKE ? "
                 + "OR CONCAT(first_name, ' ', last_name) LIKE ? "
@@ -59,7 +59,8 @@ public class IssueDAO {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             String search = "%" + searchKeyword.trim() + "%";
 
-            for (int i = 1; i <= 5; i++) {
+            stmt.setString(1, searchKeyword); //student_id
+            for (int i = 2; i <= 5; i++) {
                 stmt.setString(i, search);
             }
 

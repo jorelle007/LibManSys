@@ -169,8 +169,16 @@ public class NewBook extends javax.swing.JFrame {
 
         txtPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtPrice.setText("0.0000");
+        txtPrice.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPriceFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtPriceFocusLost(evt);
+            }
+        });
 
-        cboCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "IT / Computer", "Management & Business", "Hospitality & Tourism", "Education & Academia", "Law & Criminology", "Other" }));
+        cboCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ", "IT / Computer", "Management & Business", "Hospitality & Tourism", "Education & Academia", "Law & Criminology", "Other" }));
         cboCategory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cboCategoryActionPerformed(evt);
@@ -337,8 +345,8 @@ public class NewBook extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        btnSearch.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnSearch.setText("Clear");
+        btnSearch.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnSearch.setText("CLEAR");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSearchActionPerformed(evt);
@@ -467,7 +475,7 @@ public class NewBook extends javax.swing.JFrame {
                 return; // user canceled 
             }
             String enteredPassword = new String(pwdField.getPassword());
-     
+
             try {
                 // Step 2: Verify password in the database
                 UserDAO userDao = new UserDAO(conn);
@@ -498,73 +506,73 @@ public class NewBook extends javax.swing.JFrame {
                         "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
             }
-                
+
         }
-        
-             clearBookFields();
-             btnAdd.setEnabled(true);
-             btnUpdate.setEnabled(false);
-             btnDelete.setEnabled(false);
+
+        clearBookFields();
+        btnAdd.setEnabled(true);
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if (!validateBookFields()) {
             return;
         }
-
-        // Check if combo box is default
-        boolean comboDefault = cboCategory.getSelectedIndex() == 0; // or your default index
-
-        String priceText = txtPrice.getText().trim();
-boolean priceInvalid = false;
-
-try {
-    if (priceText.isEmpty()) {
-        throw new NumberFormatException("Empty input");
-    }
-
-    double price = Double.parseDouble(priceText);
-
-    // Reject zero or negative values
-    if (price <= 0.0) {
-        priceInvalid = true;
-    }
-} catch (NumberFormatException e) {
-    priceInvalid = true; // Non-numeric input like letters or symbols
-}
-
-// Handle result
-if (priceInvalid) {
-    txtPrice.setBackground(Color.PINK); // Highlight error
-    JOptionPane.showMessageDialog(this, "Price must be a valid amount.");
-    txtPrice.requestFocus();
-    return; // Stop further execution
-} else {
-    txtPrice.setBackground(Color.WHITE); // Reset if valid
-}
-
-        if (comboDefault || priceInvalid) {
-            String message = "The following fields are still at their default values:\n";
-            if (comboDefault) {
-                message += "- Category\n";
-            }
-            if (priceInvalid) {
-                message += "- Price\n";
-            }
-            message += "Do you want to continue?";
-
-            int option = JOptionPane.showConfirmDialog(
-                    this,
-                    message,
-                    "Warning",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE
-            );
-
-            if (option != JOptionPane.YES_OPTION) {
-                return; // user chose not to continue
-            }
-        }
+//
+//        // Check if combo box is default
+//        boolean comboDefault = cboCategory.getSelectedIndex() == 0; // or your default index
+//
+//        String priceText = txtPrice.getText().trim();
+//        boolean priceInvalid = false;
+//
+//        try {
+//            if (priceText.isEmpty()) {
+//                throw new NumberFormatException("Empty input");
+//            }
+//
+//            double price = Double.parseDouble(priceText);
+//
+//            // Reject zero or negative values
+//            if (price <= 0.0) {
+//                priceInvalid = true;
+//            }
+//        } catch (NumberFormatException e) {
+//            priceInvalid = true; // Non-numeric input like letters or symbols
+//        }
+//
+        //// Handle result
+//        if (priceInvalid) {
+//            txtPrice.setBackground(Color.PINK); // Highlight error
+//            JOptionPane.showMessageDialog(this, "Price must be a valid amount.");
+//            txtPrice.requestFocus();
+//            return; // Stop further execution
+//        } else {
+//            txtPrice.setBackground(Color.WHITE); // Reset if valid
+//        }
+//
+//        if (comboDefault || priceInvalid) {
+//            String message = "The following fields are still at their default values:\n";
+//            if (comboDefault) {
+//                message += "- Category\n";
+//            }
+//            if (priceInvalid) {
+//                message += "- Price\n";
+//            }
+//            message += "Do you want to continue?";
+//
+//            int option = JOptionPane.showConfirmDialog(
+//                    this,
+//                    message,
+//                    "Warning",
+//                    JOptionPane.YES_NO_OPTION,
+//                    JOptionPane.WARNING_MESSAGE
+//            );
+//
+//            if (option != JOptionPane.YES_OPTION) {
+//                return; // user chose not to continue
+//            }
+//        }
 
         Book book = getBookFromFields();
 
@@ -590,13 +598,43 @@ if (priceInvalid) {
 
         btnAdd.setEnabled(true);
         btnUpdate.setEnabled(false);
-        btnDelete.setEnabled(false);        
+        btnDelete.setEnabled(false);
 
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void txtSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchActionPerformed
+
+    private void txtPriceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPriceFocusGained
+        if (txtPrice.getText().equals("0.0000")) {
+            txtPrice.setText("");
+        }
+    }//GEN-LAST:event_txtPriceFocusGained
+
+    private void txtPriceFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPriceFocusLost
+        String textPrice = txtPrice.getText().trim();
+
+        if (txtPrice.getText().trim().isEmpty()) {
+            txtPrice.setText("0.0000");
+        } else {
+            try {
+                double value = Double.parseDouble(textPrice);
+
+                // If whole number, format with 2 decimal places
+                if (value == (int) value) {
+                    txtPrice.setText(String.format("%.2f", value));
+                } else {
+                    // keep original decimal value, but optionally format consistently
+                    txtPrice.setText(String.valueOf(value));
+                }
+
+            } catch (NumberFormatException e) {
+                // Optional: handle invalid input
+                txtPrice.setText("0.0000");
+            }
+        }
+    }//GEN-LAST:event_txtPriceFocusLost
 
     //Private Helper methods
     private void selectBookRow() {
@@ -634,6 +672,18 @@ if (priceInvalid) {
         btnUpdate.setEnabled(false);
         btnDelete.setEnabled(false);
         btnAdd.setEnabled(true);
+
+        // Reset background colors
+        txtTitle.setBackground(Color.WHITE);
+        txtAuthor.setBackground(Color.WHITE);
+        txtPublisher.setBackground(Color.WHITE);
+        txtYear.setBackground(Color.WHITE);
+        txtQuantity.setBackground(Color.WHITE);
+        txtPrice.setBackground(Color.WHITE);
+        cboCategory.setBackground(Color.WHITE);
+
+        // Optionally, set focus to the first field
+        txtTitle.requestFocus();
     }
 
     private Book getBookFromFields() {
@@ -672,47 +722,114 @@ if (priceInvalid) {
     }
 
     private boolean validateBookFields() {
-        // Text fields
+        StringBuilder errors = new StringBuilder();
+        int currentYear = java.time.Year.now().getValue();
+
+        // --- Text fields ---
         if (txtTitle.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Title is required.");
-            txtTitle.requestFocus();
-            return false;
-        }
-        if (txtAuthor.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Author is required.");
-            txtAuthor.requestFocus();
-            return false;
-        }
-        if (txtPublisher.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Publisher is required.");
-            txtPublisher.requestFocus();
-            return false;
+            errors.append("• Title is required.\n");
+            txtTitle.setBackground(Color.PINK);
+        } else {
+            txtTitle.setBackground(Color.WHITE);
         }
 
-        // Numeric fields
+        if (txtAuthor.getText().trim().isEmpty()) {
+            errors.append("• Author is required.\n");
+            txtAuthor.setBackground(Color.PINK);
+        } else {
+            txtAuthor.setBackground(Color.WHITE);
+        }
+
+        if (txtPublisher.getText().trim().isEmpty()) {
+            errors.append("• Publisher is required.\n");
+            txtPublisher.setBackground(Color.PINK);
+        } else {
+            txtPublisher.setBackground(Color.WHITE);
+        }
+
+        // --- Year field ---
         try {
             int year = Integer.parseInt(txtYear.getText().trim());
             txtYear.setBackground(Color.WHITE);
-            int currentYear = java.time.Year.now().getValue();
-            if (year < 1900 || year > java.time.Year.now().getValue()) {
-                JOptionPane.showConfirmDialog(this, "Year must be between 1900 and "
-                        + currentYear);
-                txtYear.requestFocus();
+            if (year < 1900 || year > currentYear) {
+                errors.append("• Year must be between 1900 and " + currentYear + ".\n");
+                txtYear.setBackground(Color.PINK);
             }
         } catch (NumberFormatException e) {
-            txtYear.setBackground(Color.PINK); 
-            JOptionPane.showMessageDialog(this, "Year must be a number.");
-            txtYear.requestFocus();
-            return false;
+            errors.append("• Year must be a valid number between 1900 and " + currentYear + ".\n");
+            txtYear.setBackground(Color.PINK);
         }
 
+        // --- Quantity field ---
         try {
             int quantity = Integer.parseInt(txtQuantity.getText().trim());
             txtQuantity.setBackground(Color.WHITE);
+            if (quantity <= 0 || quantity > 1000) {
+                errors.append("• Quantity must be between 1 and 1000.\n");
+                txtQuantity.setBackground(Color.PINK);
+            }
         } catch (NumberFormatException e) {
-            txtQuantity.setBackground(Color.PINK); 
-            JOptionPane.showMessageDialog(this, "Quantity must be a number.");
-            txtQuantity.requestFocus();
+            errors.append("• Quantity must be a number.\n");
+            txtQuantity.setBackground(Color.PINK);
+        }
+
+        // --- Combo box (category) ---
+        // Recommended: make index 0 a blank like "Select Category"
+        boolean comboDefault = cboCategory.getSelectedIndex() == 0;
+        if (comboDefault) {
+            errors.append("• Please select a category.\n");
+            cboCategory.setBackground(Color.PINK);
+        } else {
+            cboCategory.setBackground(Color.WHITE);
+        }
+
+        // --- Price field ---
+        String priceText = txtPrice.getText().trim();
+        boolean priceInvalid = false;
+        try {
+            if (priceText.isEmpty()) {
+                throw new NumberFormatException("Empty input");
+            }
+
+            double price = Double.parseDouble(priceText);
+            if (price <= 0.0) {
+                priceInvalid = true;
+            }
+        } catch (NumberFormatException e) {
+            priceInvalid = true;
+        }
+
+        if (priceInvalid) {
+            errors.append("• Price must be a valid positive amount.\n");
+            txtPrice.setBackground(Color.PINK);
+        } else {
+            txtPrice.setBackground(Color.WHITE);
+        }
+
+        // --- Show all errors together ---
+        if (errors.length() > 0) {
+            JOptionPane.showMessageDialog(this,
+                    "Please fix the following issues:\n\n" + errors.toString(),
+                    "Validation Errors",
+                    JOptionPane.WARNING_MESSAGE);
+
+            // Focus on the first invalid field
+            if (txtTitle.getBackground() == Color.PINK) {
+                txtTitle.requestFocus();
+            } else if (txtAuthor.getBackground() == Color.PINK) {
+                txtAuthor.requestFocus();
+            } else if (txtPublisher.getBackground() == Color.PINK) {
+                txtPublisher.requestFocus();
+            } else if (txtYear.getBackground() == Color.PINK) {
+                txtYear.requestFocus();
+            } else if (txtQuantity.getBackground() == Color.PINK) {
+                txtQuantity.requestFocus();
+            } else if (cboCategory.getBackground() == Color.PINK) {
+                cboCategory.requestFocus();
+            } else if (txtPrice.getBackground() == Color.PINK) {
+                txtPrice.requestFocus();
+            }
+
             return false;
         }
 
