@@ -4,6 +4,7 @@ import java.sql.*;
 import static java.time.Clock.system;
 import java.util.stream.Stream;
 import javax.swing.JOptionPane;
+import libmansys.dao.DatabaseConnection;
 import libmansys.dao.UserDAO;
 import libmansys.model.User;
 
@@ -304,10 +305,22 @@ public class Login extends javax.swing.JFrame {
         String password = new String(pwfPassword.getPassword());
 
         //if (username.isEmpty() || password.isEmpty()) {
-            if (Stream.of(username, password).anyMatch(String::isEmpty)) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields.");
+        if (Stream.of(username, password).anyMatch(String::isEmpty)) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields.");
+            return;
+        }
+
+        if (conn == null) {
+            try {
+                conn = DatabaseConnection.getConnection();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Failed to connect to database: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
+        }
 
             try {
                 UserDAO dao = new UserDAO(conn);
@@ -325,19 +338,24 @@ public class Login extends javax.swing.JFrame {
             }
     }//GEN-LAST:event_btnLoginActionPerformed
 
-    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
-        this.dispose();
-        Reset reset = new Reset(conn);
-        reset.setLocationRelativeTo(null);
-        reset.setVisible(true);
-    }//GEN-LAST:event_btnResetActionPerformed
-
     private void btnSignUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignUpActionPerformed
+        if (conn == null) {
+            try {
+                conn = DatabaseConnection.getConnection();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Failed to connect to database: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
         this.dispose();
         SignUp signup = new SignUp(conn);
         signup.setLocationRelativeTo(null);
         signup.setVisible(true);
     }//GEN-LAST:event_btnSignUpActionPerformed
+
 
     private void txtUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsernameActionPerformed
   
@@ -358,6 +376,25 @@ public class Login extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
       
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        if (conn == null) {
+            try {
+                conn = DatabaseConnection.getConnection();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Failed to connect to database: " + ex.getMessage(),
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+        this.dispose();
+        Reset reset = new Reset(conn);
+        reset.setLocationRelativeTo(null);
+        reset.setVisible(true);
+    }//GEN-LAST:event_btnResetActionPerformed
+
 
     /**
      * @param args the command line arguments
@@ -389,7 +426,16 @@ public class Login extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Login().setVisible(true);
+                try {
+                    Connection conn = DatabaseConnection.getConnection();
+                    new Login(conn).setVisible(true);
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null,
+                        "Failed to connect to database: " + ex.getMessage(),
+                        "Database Error",
+                        JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
             }
         });
     }

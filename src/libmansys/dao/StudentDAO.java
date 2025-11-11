@@ -9,13 +9,12 @@ import javax.swing.table.DefaultTableModel;
  */
 public class StudentDAO {
 
-
     private Connection conn;
 
     public StudentDAO(Connection conn) {
         this.conn = conn; // optimize database para magamit lahat ng methods
     }
-    
+
     public int getNextStudentId() { //optional.. kunin yung id na naka auto-increment
         int nextId = 1;
         String sql = "SHOW TABLE STATUS LIKE 'tstudent'"; //kukunin metadata at yung current auto-increment
@@ -23,7 +22,7 @@ public class StudentDAO {
         try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
             if (rs.next()) {
-                nextId = rs.getInt("Auto_increment"); 
+                nextId = rs.getInt("Auto_increment");
             }
 
         } catch (SQLException e) {
@@ -36,7 +35,7 @@ public class StudentDAO {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
 
-        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent")) {
+        try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery("SELECT * FROM tstudent WHERE isDeleted = FALSE")) {
 
             while (rs.next()) {
                 Object[] row = new Object[8];
@@ -112,22 +111,42 @@ public class StudentDAO {
         }
     }
 
-    public void deleteStudent(int studentId) {
-        String sql = "DELETE FROM tstudent WHERE student_id = ?"; // pagdelete sa student
+    public boolean deleteStudent(int studentId) throws SQLException {
+        String checkQuery = "SELECT COUNT(*) FROM tBTR b "
+                + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
+                + "WHERE b.student_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(checkQuery)) {
+            ps.setInt(1, studentId);
+            ResultSet rs = ps.executeQuery();
 
-            pst.setInt(1, studentId);
-            int rows = pst.executeUpdate();
-
-            if (rows > 0) {
-                System.out.println("Student deleted successfully!");
+            if (rs.next() && rs.getInt(1) == 0) {
+                // Safe to soft-delete
+                String deleteQuery = "UPDATE tstudent SET isDeleted = TRUE, deletedAt = NOW() WHERE student_id = ?";
+                try (PreparedStatement psDel = conn.prepareStatement(deleteQuery)) {
+                    psDel.setInt(1, studentId);
+                    psDel.executeUpdate();
+                }
+                return true; // deleted successfully
             } else {
-                System.out.println("No student found with ID: " + studentId);
+                return false; // cannot delete, book is borrowed
             }
-
-        } catch (SQLException e) {
-            System.out.println("Error deleting student: " + e.getMessage());
         }
     }
+//        String sql = "DELETE FROM tstudent WHERE student_id = ?"; // pagdelete sa student
+//
+//        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+//
+//            pst.setInt(1, studentId);
+//            int rows = pst.executeUpdate();
+//
+//            if (rows > 0) {
+//                System.out.println("Student deleted successfully!");
+//            } else {
+//                System.out.println("No student found with ID: " + studentId);
+//            }
+//
+//        } catch (SQLException e) {
+//            System.out.println("Error deleting student: " + e.getMessage());
+//        }
 }

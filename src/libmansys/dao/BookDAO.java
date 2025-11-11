@@ -154,9 +154,9 @@ public class BookDAO {
 
     //Delete Book
     public boolean deleteBook(int bookID) throws SQLException {
-        String checkQuery = "SELECT COUNT(*) FROM tBTR b " +
-                            "LEFT JOIN tReturn r ON b.btr_id = r.btr_id " +
-                            "WHERE b.book_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
+        String checkQuery = "SELECT COUNT(*) FROM tBTR b "
+                + "LEFT JOIN tReturn r ON b.btr_id = r.btr_id "
+                + "WHERE b.book_id = ? AND (r.return_date IS NULL OR r.return_date = '00-00-0000')";
 
         try (PreparedStatement ps = conn.prepareStatement(checkQuery)) {
             ps.setInt(1, bookID);
@@ -174,8 +174,9 @@ public class BookDAO {
                 return false; // cannot delete, book is borrowed
             }
         }
+    }
 
-        //String sql = "DELETE FROM tbook WHERE book_id = ?";
+    //String sql = "DELETE FROM tbook WHERE book_id = ?";
 //        String sql = "UPDATE tBook SET isDeleted = TRUE, "
 //                + "deletedAt = CURRENT_TIMESTAMP "
 //                + "WHERE book_id = ?";
@@ -184,8 +185,6 @@ public class BookDAO {
 //            int rowsAffected = stmt.executeUpdate();
 //            return rowsAffected > 0;
 //        }
-    }
-
     //helper method to get a book record by Id
     public Book getBookById(int bookId) throws SQLException {
         String sql = "SELECT * FROM tbook WHERE book_id = ?";

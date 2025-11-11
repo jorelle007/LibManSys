@@ -17,11 +17,11 @@ public class Student extends javax.swing.JFrame {
     private StudentDAO studentDAO;
     private Connection conn;
     private String currentUsername;
-    
+
     public Student() {
         this(null, null);
     }
-    
+
     public Student(Connection conn) {
         this(conn, null);
     }
@@ -52,12 +52,12 @@ public class Student extends javax.swing.JFrame {
         for (int i = 0; i < tblStudents.getColumnCount(); i++) {
             tblStudents.getColumnModel().getColumn(i).setCellRenderer(renderer);
         }
-        
+
         //add live search
         PromptSupport.setPrompt("Search by First Name, Last Name, or Email", txtSearch);
         PromptSupport.setForeground(Color.GRAY, txtSearch);
         PromptSupport.setFocusBehavior(PromptSupport.FocusBehavior.SHOW_PROMPT, txtSearch);
-        
+
         Helper.addTableFilter(tblStudents, txtSearch, 1, 2, 5);
 
         //disable buttons in load up
@@ -93,6 +93,7 @@ public class Student extends javax.swing.JFrame {
         txtCourse.setText("");
         txtContact.setText("");
         txtEmail.setText("");
+        tblStudents.clearSelection();
     }
 
     @SuppressWarnings("unchecked")
@@ -363,7 +364,7 @@ public class Student extends javax.swing.JFrame {
     }//GEN-LAST:event_txtFirstNameActionPerformed
 
     private void btnHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
-        Helper.goBackToHome(this, conn);
+        Helper.goBackToHome(this, conn, currentUsername);
     }//GEN-LAST:event_btnHomeActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
@@ -487,14 +488,33 @@ public class Student extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(this, "Incorrect password. Delete cancelled.");
                     return;
                 } else {
-                    studentDAO.deleteStudent(studentId);
-                    JOptionPane.showMessageDialog(this, "Student deleted successfully!");
+                    int studentID = Integer.parseInt(txtStudentID.getText());
+                    String studentName = txtFirstName.getText() + txtLastName.getText();
+                    boolean isDeleted = studentDAO.deleteStudent(studentID);
 
-                    clearTextFields();
-                    loadStudents();
-                    getNextID();
+                    if (isDeleted) {
+                        JOptionPane.showMessageDialog(this, "Student " + studentName + "  has been successfully deleted.",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
+                        //JOptionPane.showMessageDialog(this, "Book " + title + " deleted succesfully");
+                        loadStudents();
+                        clearTextFields();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Cannot delete student: borrowed books not returned!",
+                                "Warning", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
 
+//                if (user == null) {
+//                    JOptionPane.showMessageDialog(this, "Incorrect password. Delete cancelled.");
+//                    return;
+//                } else {
+//                    studentDAO.deleteStudent(studentId);
+//                    JOptionPane.showMessageDialog(this, "Student deleted successfully!");
+//
+//                    clearTextFields();
+//                    loadStudents();
+//                    getNextID();
+//                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error deleting student: " + ex.getMessage());
                 ex.printStackTrace();
@@ -505,7 +525,6 @@ public class Student extends javax.swing.JFrame {
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         clearTextFields();
     }//GEN-LAST:event_btnClearActionPerformed
-
 
     private void tableClick() {
         tblStudents.getSelectionModel().addListSelectionListener(e -> {
@@ -527,7 +546,7 @@ public class Student extends javax.swing.JFrame {
         });
     }
 
-        /**
+    /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
