@@ -18,6 +18,7 @@ import java.util.Date;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import libmansys.dao.StudentDAO;
 import org.jdesktop.swingx.prompt.PromptSupport;
 
 public class Return extends javax.swing.JFrame {
@@ -29,10 +30,7 @@ public class Return extends javax.swing.JFrame {
     private String studentID;
     private java.sql.Date storedReturnDate;
     private int storedOverdue;
-
-    public Return() {
-        this(null, null, null);
-    }
+    private StudentDAO studentDAO;
 
     public Return(Connection conn, String selectedBookID, String currentUsername) {
         initComponents();
@@ -43,6 +41,7 @@ public class Return extends javax.swing.JFrame {
             return; // 
         }
         this.returnDAO = new ReturnDAO(conn);
+        this.studentDAO = new StudentDAO(conn);
         this.conn = conn;
         this.selectedBookID = selectedBookID;
         this.currentUsername = currentUsername;
@@ -136,7 +135,7 @@ public class Return extends javax.swing.JFrame {
         //set current date for return datepicker
         returnDate.setDate(new java.util.Date());
         returnDate.setDateFormatString("MM/dd/yyyy");
-        
+
         java.util.Date utilDate = returnDate.getDate();
         storedReturnDate = new java.sql.Date(utilDate.getTime());
     }
@@ -155,7 +154,7 @@ public class Return extends javax.swing.JFrame {
             txtName.setText(rs.getString("full_name"));
             txtCourse.setText(rs.getString("course"));
             txtEmail.setText(rs.getString("email_address"));
-            
+
             studentID = txtStudentID.getText();
 
             // Fill the table with the selected borrowed book
@@ -248,7 +247,7 @@ public class Return extends javax.swing.JFrame {
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel8.setText("Condition");
 
-        cboCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Good", "Lost", "Damaged" }));
+        cboCondition.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Good", "Lost", "Minor Damage", "Major Damage" }));
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel11.setText("Student ID");
@@ -442,15 +441,37 @@ public class Return extends javax.swing.JFrame {
             return;
         }
 
-        // Get all borrowed books for this student
+        // 1. Check if student exists
+        boolean exists = studentDAO.studentExists(keyword);
+
+        if (!exists) {
+            JOptionPane.showMessageDialog(this, "Student does not exist.");
+            return;
+        }
+
         ArrayList<ArrayList<String>> borrows = returnDAO.searchBorrow(keyword);
 
+        if (borrows == null || borrows.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Student has no borrowed records.");
+            return;
+        }
+
+        ArrayList<String> first = borrows.get(0); //get the first row
+
+        String studentId = first.get(6); //get student ID
+        String studentName = first.get(7); // get full name
+
+        if ((studentId == null || studentId.trim().isEmpty())
+                && (studentName == null || studentName.trim().isEmpty())) {
+
+            JOptionPane.showMessageDialog(this, "Student does not exist.");
+            return;
+        }
+
         if (borrows.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No record found.");
+            JOptionPane.showMessageDialog(this, "No borrowed record found for this student.");
             return;
         } else {
-            // Fill student info using the first row
-            ArrayList<String> first = borrows.get(0);
             txtStudentID.setText(first.get(6));
             txtName.setText(first.get(7));
             txtCourse.setText(first.get(8));
@@ -542,7 +563,7 @@ public class Return extends javax.swing.JFrame {
             txtStudentID.setText(first.get(6));
             txtName.setText(first.get(7));
             txtCourse.setText(first.get(8));
-            txtEmail.setText(first.get(9));                        
+            txtEmail.setText(first.get(9));
 
             // Add all borrowed books to the table
             for (ArrayList<String> borrow : borrows) {
@@ -630,12 +651,16 @@ public class Return extends javax.swing.JFrame {
                     penalty = overdueDays * 10.0;
                     break;
 
-                case "Damaged":
-                    penalty = bookPrice;
-                    break;
-
                 case "Lost":
                     penalty = bookPrice + (overdueDays * 10.0);
+                    break;
+
+                case "Minor Damage":
+                    penalty = 50;
+                    break;
+
+                case "Major Damage":
+                    penalty = bookPrice;
                     break;
             }
 
@@ -653,37 +678,6 @@ public class Return extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(NewBook.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(NewBook.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(NewBook.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(NewBook.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Return().setVisible(true);
-            }
-        });
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnHome;
