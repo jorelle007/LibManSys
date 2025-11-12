@@ -146,7 +146,7 @@ public class Summary extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "BTR ID", "Student ID", "Book ID", "Borrow Date", "Due Date", "Status", "Student Name"
+                "Book Name", "Student ID", "Book ID", "Borrow Date", "Due Date", "Status", "Student Name"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -217,7 +217,7 @@ public class Summary extends javax.swing.JFrame {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Return ID", "BTR ID", "Return date", "Condition", "Days overdue", "Penalty", "Student Name"
+                "Return ID", "Book Name", "Return date", "Condition", "Days overdue", "Penalty", "Student Name"
             }
         ));
         jScrollPane2.setViewportView(jTable2);

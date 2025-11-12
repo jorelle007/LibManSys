@@ -22,7 +22,9 @@ public class SummaryBorrowDAO {
 
     public void loadBorrowed(JTable table, Date fromDate, Date toDate) throws SQLException {
         String sql
-                = "SELECT b.btr_id, "
+                = "SELECT "
+                + "b.btr_id, "
+                + "bk.title AS book_title, "
                 + "CONCAT(s.first_name, ' ', s.last_name) AS student_name, "
                 + "b.book_id, "
                 + "b.student_id, "
@@ -30,7 +32,8 @@ public class SummaryBorrowDAO {
                 + "b.due_date, "
                 + "b.status "
                 + "FROM tbtr b "
-                + "JOIN tstudent s ON b.student_id = s.student_id";
+                + "JOIN tstudent s ON b.student_id = s.student_id "
+                + "JOIN tbook bk ON b.book_id = bk.book_id";
 
         if (fromDate != null || toDate != null) {
             sql += " WHERE 1=1";
@@ -59,7 +62,7 @@ public class SummaryBorrowDAO {
 
                 while (rs.next()) {
                     Object[] row = new Object[]{
-                        rs.getInt("btr_id"),
+                        rs.getString("book_title"),
                         rs.getInt("student_id"),
                         rs.getInt("book_id"),
                         rs.getDate("borrow_date"),

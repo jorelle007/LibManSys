@@ -24,6 +24,7 @@ public class SummaryReturnDAO {
         String sql
                 = "SELECT "
                 + "r.return_id, "
+                + "bk.title AS book_title, "
                 + "r.btr_id, "
                 + "CONCAT(s.first_name, ' ', s.last_name) AS student_name, "
                 + "r.return_date, "
@@ -32,7 +33,9 @@ public class SummaryReturnDAO {
                 + "r.penalty "
                 + "FROM treturn r "
                 + "JOIN tbtr b ON r.btr_id = b.btr_id "
-                + "JOIN tstudent s ON b.student_id = s.student_id";
+                + "JOIN tstudent s ON b.student_id = s.student_id "
+                + "JOIN tbook bk ON b.book_id = bk.book_id";
+
 
         if (fromDate != null || toDate != null) {
             sql += " WHERE 1=1";
@@ -62,7 +65,7 @@ public class SummaryReturnDAO {
                 while (rs.next()) {
                     Object[] row = new Object[]{
                         rs.getInt("return_id"),
-                        rs.getInt("btr_id"),
+                        rs.getString("book_title"),
                         rs.getDate("return_date"),
                         rs.getString("condition_on_return"),
                         rs.getInt("days_overdue"),
